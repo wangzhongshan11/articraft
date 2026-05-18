@@ -48,7 +48,7 @@ class _DummyRegistry:
 
 
 class _SingleResponseLLM:
-    model_id = "gpt-5.4"
+    model_id = "gpt-5.5-2026-04-23"
 
     async def generate_with_tools(
         self, system_prompt: str, messages: list[dict], tools: list[dict]
@@ -83,7 +83,7 @@ class _FakeCompactionEvent:
 
 
 class _MaintenanceOnlyLLM:
-    model_id = "gpt-5.4"
+    model_id = "gpt-5.5-2026-04-23"
 
     async def prepare_next_request(
         self,
@@ -165,7 +165,7 @@ def test_harness_cost_limit_trips_and_persists_cost_json(tmp_path: Path) -> None
     agent.system_prompt = "system"
     agent.sdk_docs_context = ""
     agent.cost_tracker = CostTracker(
-        model_id="gpt-5.4",
+        model_id="gpt-5.5-2026-04-23",
         pricing={"input_uncached": 2.5, "input_cached": 0.25, "output": 15.0},
     )
     agent.max_cost_usd = 0.01
@@ -206,7 +206,7 @@ def test_harness_persists_compaction_maintenance_cost_and_trace(tmp_path: Path) 
     agent.system_prompt = "system"
     agent.sdk_docs_context = "sdk docs"
     agent.cost_tracker = CostTracker(
-        model_id="gpt-5.4",
+        model_id="gpt-5.5-2026-04-23",
         pricing={"input_uncached": 2.5, "input_cached": 0.25, "output": 15.0},
     )
     agent.max_cost_usd = 0.01

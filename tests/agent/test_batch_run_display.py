@@ -16,7 +16,7 @@ def _make_display() -> tuple[BatchRunDisplay, StringIO]:
         experiment_name="hinge_batch",
         total_runs=20,
         concurrency=4,
-        model_id="gpt-5.4",
+        model_id="gpt-5.5-2026-04-23",
         enabled=True,
     )
     return display, buffer

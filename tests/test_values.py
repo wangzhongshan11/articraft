@@ -19,7 +19,7 @@ from articraft.values import (
         ("gpt-5.5-2026-04-23", ProviderName.OPENAI),
         ("claude-sonnet-4-5", ProviderName.ANTHROPIC),
         ("gemini-3-flash-preview", ProviderName.GEMINI),
-        ("openai/gpt-5.4", ProviderName.OPENROUTER),
+        ("openai/gpt-5.5-2026-04-23", ProviderName.OPENROUTER),
     ],
 )
 def test_infer_provider_from_model_id(model_id: str, provider: ProviderName) -> None:

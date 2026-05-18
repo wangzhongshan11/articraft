@@ -19,7 +19,7 @@ def _make_row() -> batch_runner.BatchRowSpec:
         category_title="Hinge",
         prompt="make a hinge",
         provider="openai",
-        model_id="gpt-5.4",
+        model_id="gpt-5.5-2026-04-23",
         thinking_level="high",
         max_turns=12,
         max_cost_usd=None,
@@ -99,7 +99,7 @@ def test_resume_signature_and_mismatch_field() -> None:
         "category_slug": "hinge",
         "prompt": "make a hinge",
         "provider": "openai",
-        "model_id": "gpt-5.4",
+        "model_id": "gpt-5.5-2026-04-23",
         "thinking_level": "high",
         "max_turns": 12,
         "max_cost_usd": None,
@@ -110,7 +110,7 @@ def test_resume_signature_and_mismatch_field() -> None:
         "hinge",
         "make a hinge",
         "openai",
-        "gpt-5.4",
+        "gpt-5.5-2026-04-23",
         "high",
         12,
         None,
@@ -121,7 +121,7 @@ def test_resume_signature_and_mismatch_field() -> None:
     existing["model_id"] = "gpt-5.3"
     assert batch_runner._resume_signature_mismatch_field(existing, row) == "model_id"
 
-    existing["model_id"] = "gpt-5.4"
+    existing["model_id"] = "gpt-5.5-2026-04-23"
     existing["max_cost_usd"] = 1.25
     assert batch_runner._resume_signature_mismatch_field(existing, row) == "max_cost_usd"
 
@@ -211,7 +211,7 @@ def test_write_row_state_serializes_attempts(tmp_path: Path) -> None:
     attempt = batch_runner.BatchAttemptRecord(
         timestamp="2026-03-26T12:00:00Z",
         provider="openai",
-        model_id="gpt-5.4",
+        model_id="gpt-5.5-2026-04-23",
         thinking_level="high",
         max_turns=12,
         max_cost_usd=None,

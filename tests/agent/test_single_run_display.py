@@ -14,7 +14,7 @@ def _make_display() -> tuple[SingleRunDisplay, StringIO]:
     console = Console(file=buffer, force_terminal=False, color_system=None, width=160)
     display = SingleRunDisplay(
         console=console,
-        model_id="gpt-5.4",
+        model_id="gpt-5.5-2026-04-23",
         thinking_level="high",
         max_turns=30,
         enabled=True,
@@ -28,7 +28,7 @@ def test_start_shows_run_header() -> None:
     display.start()
 
     output = buffer.getvalue()
-    assert "run gpt-5.4" in output
+    assert "run gpt-5.5-2026-04-23" in output
 
 
 def test_openrouter_run_header_and_zero_cost_llm_line() -> None:
@@ -393,7 +393,7 @@ def test_logging_clears_live_wait_line_before_emitting() -> None:
     console = Console(file=buffer, force_terminal=False, color_system=None, width=160)
     display = SingleRunDisplay(
         console=console,
-        model_id="gpt-5.4",
+        model_id="gpt-5.5-2026-04-23",
         thinking_level="high",
         max_turns=30,
         enabled=True,

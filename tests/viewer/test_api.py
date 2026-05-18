@@ -57,7 +57,7 @@ def _write_record(
             source=SourceRef(run_id=source_run_id),
             sdk_package="sdk",
             provider="openai",
-            model_id="gpt-5.4",
+            model_id="gpt-5.5-2026-04-23",
             display=DisplayMetadata(title=title, prompt_preview=prompt),
             artifacts=RecordArtifacts(
                 prompt_txt="prompt.txt",
@@ -356,7 +356,7 @@ def test_viewer_api_promote_uses_category_slug_not_display_title(
             created_at="2026-03-19T14:44:36Z",
             updated_at="2026-03-19T14:44:36Z",
             provider="openai",
-            model_id="gpt-5.4",
+            model_id="gpt-5.5-2026-04-23",
             sdk_package="sdk",
             status="success",
             category_slug=None,

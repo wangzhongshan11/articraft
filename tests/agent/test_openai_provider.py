@@ -96,7 +96,7 @@ def test_openai_provider_loads_dotenv_over_exported_key(monkeypatch, tmp_path) -
 
 
 def test_openai_context_window_pressure_reports_prompt_fraction() -> None:
-    provider = OpenAILLM(model_id="gpt-5.4", dry_run=True)
+    provider = OpenAILLM(model_id="gpt-5.5-2026-04-23", dry_run=True)
 
     pressure = provider.context_window_pressure(
         {
@@ -362,11 +362,11 @@ def test_openai_default_model_is_latest_snapshot() -> None:
     assert provider.model_id == "gpt-5.5-2026-04-23"
 
 
-def test_openai_default_compaction_model_is_mini() -> None:
+def test_openai_default_compaction_model_matches_main_model() -> None:
     provider = OpenAILLM(dry_run=True)
 
-    assert DEFAULT_OPENAI_COMPACTION_MODEL == "gpt-5.4-mini"
-    assert provider.compaction_model_id == "gpt-5.4-mini"
+    assert DEFAULT_OPENAI_COMPACTION_MODEL == DEFAULT_OPENAI_MODEL
+    assert provider.compaction_model_id == DEFAULT_OPENAI_MODEL
 
 
 def test_convert_tools_normalizes_function_schemas_for_responses_strict_mode() -> None:

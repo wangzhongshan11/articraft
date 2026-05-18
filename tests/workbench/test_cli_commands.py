@@ -224,7 +224,7 @@ def test_workbench_rerun_record_command_accepts_model_and_thinking_overrides(
             repo_root=repo_root,
             image_path=None,
             provider="openai",
-            model_id="gpt-5.4",
+            model_id="gpt-5.5-2026-04-23",
             thinking_level="high",
             max_turns=30,
             system_prompt_path="designer_system_prompt.txt",
@@ -283,7 +283,7 @@ def test_workbench_rerun_record_command_prefers_source_run_thinking_parameters(
             repo_root=repo_root,
             image_path=None,
             provider="openai",
-            model_id="gpt-5.4",
+            model_id="gpt-5.5-2026-04-23",
             thinking_level="low",
             max_turns=30,
             system_prompt_path="designer_system_prompt.txt",
@@ -340,7 +340,7 @@ def test_workbench_rerun_record_command_accepts_sdk_override(
             repo_root=repo_root,
             image_path=None,
             provider="openai",
-            model_id="gpt-5.4",
+            model_id="gpt-5.5-2026-04-23",
             thinking_level="high",
             max_turns=30,
             system_prompt_path="designer_system_prompt.txt",
@@ -502,7 +502,7 @@ def test_workbench_init_record_command(
                 "--provider",
                 "openai",
                 "--model-id",
-                "gpt-5.4",
+                "gpt-5.5-2026-04-23",
                 "--thinking-level",
                 "high",
                 "--max-cost-usd",
@@ -526,7 +526,7 @@ def test_workbench_init_record_command(
     assert record["record_id"] == record_dir.name
     assert record["kind"] == "draft_model"
     assert record["provider"] == "openai"
-    assert record["model_id"] == "gpt-5.4"
+    assert record["model_id"] == "gpt-5.5-2026-04-23"
     assert record["collections"] == ["workbench"]
     assert record["display"]["title"] == "reading lamp draft"
 
@@ -545,7 +545,7 @@ def test_workbench_init_record_command(
         _artifact_path(record_dir, "provenance.json").read_text(encoding="utf-8")
     )
     assert provenance["generation"]["provider"] == "openai"
-    assert provenance["generation"]["model_id"] == "gpt-5.4"
+    assert provenance["generation"]["model_id"] == "gpt-5.5-2026-04-23"
     assert provenance["generation"]["max_turns"] == DEFAULT_MAX_TURNS
     assert provenance["generation"]["max_cost_usd"] == 2.5
     assert provenance["run_summary"]["final_status"] == "draft"
@@ -674,7 +674,7 @@ def test_workbench_init_record_command_uses_single_scaffold(
                 "--provider",
                 "openai",
                 "--model-id",
-                "gpt-5.4",
+                "gpt-5.5-2026-04-23",
                 "--thinking-level",
                 "high",
             ]

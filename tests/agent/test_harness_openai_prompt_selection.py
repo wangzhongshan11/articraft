@@ -22,7 +22,7 @@ _REMOVED_PACKAGE = "_".join(("sdk", "hybrid"))
 def _build_openai_preview(
     user_content: object = "a pair of scissors",
     *,
-    model_id: str = "gpt-5.4",
+    model_id: str = "gpt-5.5-2026-04-23",
     system_prompt_path: str = DESIGNER_PROMPT_NAME,
     sdk_package: str = "sdk",
 ) -> dict:
@@ -57,7 +57,7 @@ def test_openai_prompt_resolution_and_payload_preview() -> None:
     payload = build_provider_payload_preview(
         "a pair of scissors",
         provider="openai",
-        model_id="gpt-5.4",
+        model_id="gpt-5.5-2026-04-23",
         thinking_level="high",
         system_prompt_path=DESIGNER_PROMPT_NAME,
     )

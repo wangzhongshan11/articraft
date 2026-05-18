@@ -483,7 +483,7 @@ def test_external_examples_prints_high_rated_matches(tmp_path: Path, capsys) -> 
                 source=SourceRef(run_id=None),
                 sdk_package="sdk",
                 provider="openai",
-                model_id="gpt-5.4",
+                model_id="gpt-5.5-2026-04-23",
                 display=DisplayMetadata(title=prompt.title(), prompt_preview=prompt),
                 artifacts=RecordArtifacts(
                     prompt_txt="prompt.txt",

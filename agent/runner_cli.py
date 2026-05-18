@@ -18,6 +18,7 @@ from agent.cost import max_cost_usd_from_env, parse_max_cost_usd
 from agent.payload_preview import build_provider_payload_preview
 from agent.prompts import normalize_sdk_package
 from agent.providers.factory import validate_provider_credentials
+from agent.providers.openai import DEFAULT_OPENAI_MODEL
 from agent.run_context import _default_model_id
 from agent.single_run import run_from_input
 from agent.tools import build_initial_user_content as _build_initial_user_content
@@ -111,7 +112,11 @@ def main(
         default=None,
         help="Optional category slug to attach to the record. Required for --collection dataset.",
     )
-    parser.add_argument("--model", default=None, help="Model id (provider-specific).")
+    parser.add_argument(
+        "--model",
+        default=DEFAULT_OPENAI_MODEL,
+        help="Model id (provider-specific).",
+    )
     parser.add_argument(
         "--openai-transport",
         default="http",

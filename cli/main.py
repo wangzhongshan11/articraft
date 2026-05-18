@@ -11,6 +11,7 @@ from shutil import which
 
 from agent import runner as agent_runner
 from agent.providers.factory import infer_provider_from_model_id
+from agent.providers.openai import DEFAULT_OPENAI_MODEL
 from articraft.values import PROVIDER_VALUES, THINKING_LEVEL_VALUES
 from cli import compile_all as compile_all_cli
 from cli import compile_record as compile_record_cli
@@ -24,7 +25,7 @@ from cli.common import provider_for_record_image, refresh_dataset_manifest_if_me
 from storage.repo import StorageRepo
 from storage.search import SearchIndex
 
-DEFAULT_MODEL = "gpt-5.5-2026-04-23"
+DEFAULT_MODEL = DEFAULT_OPENAI_MODEL
 DEFAULT_THINKING = "high"
 
 DatasetDispatchKey = tuple[str, str | None]

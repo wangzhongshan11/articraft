@@ -40,7 +40,7 @@ def _write_batch_spec(repo: StorageRepo) -> None:
         (
             "row_id,category_slug,category_title,prompt,provider,model_id,"
             "thinking_level,max_turns,sdk_package\n"
-            "row_1,hinge,Hinge,Make a hinge,openai,gpt-5.4,high,10,sdk\n"
+            "row_1,hinge,Hinge,Make a hinge,openai,gpt-5.5-2026-04-23,high,10,sdk\n"
         ),
         encoding="utf-8",
     )
@@ -77,7 +77,7 @@ def _write_record(repo: StorageRepo, record_id: str, prompt_sha: str, dataset_id
     }
     generation = {
         "provider": "openai",
-        "model_id": "gpt-5.4",
+        "model_id": "gpt-5.5-2026-04-23",
         "thinking_level": "high",
         "max_turns": 10,
     }
@@ -100,7 +100,7 @@ def _write_record(repo: StorageRepo, record_id: str, prompt_sha: str, dataset_id
             "source": source,
             "sdk_package": "sdk",
             "provider": "openai",
-            "model_id": "gpt-5.4",
+            "model_id": "gpt-5.5-2026-04-23",
             "display": {"title": "Hinge", "prompt_preview": "Make a hinge"},
             "artifacts": artifacts,
             "hashes": hashes,

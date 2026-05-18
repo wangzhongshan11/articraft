@@ -15,6 +15,6 @@ def test_default_max_turns_for_model_uses_gemini_3_flash_override() -> None:
 
 
 def test_default_max_turns_for_model_keeps_baseline_for_other_models() -> None:
-    assert default_max_turns_for_model("gpt-5.4") == DEFAULT_MAX_TURNS
+    assert default_max_turns_for_model("gpt-5.5-2026-04-23") == DEFAULT_MAX_TURNS
     assert default_max_turns_for_model("gemini-3.1-pro-preview") == DEFAULT_MAX_TURNS
     assert default_max_turns_for_model("gemini-2.5-flash") == DEFAULT_MAX_TURNS

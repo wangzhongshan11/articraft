@@ -66,7 +66,7 @@ def test_storage_repo_round_trips_records_collections_and_runs(tmp_path: Path) -
         source=SourceRef(run_id="run_123", prompt_batch_id="batch_001", prompt_index=3),
         sdk_package="sdk",
         provider="openai",
-        model_id="gpt-5.4",
+        model_id="gpt-5.5-2026-04-23",
         display=DisplayMetadata(title="Hinge", prompt_preview="model a hinge"),
         artifacts=RecordArtifacts(
             prompt_txt="prompt.txt",
@@ -109,7 +109,7 @@ def test_storage_repo_round_trips_records_collections_and_runs(tmp_path: Path) -
     provenance = Provenance(
         schema_version=2,
         record_id="rec_123",
-        generation=GenerationSettings(provider="openai", model_id="gpt-5.4", thinking_level="high"),
+        generation=GenerationSettings(provider="openai", model_id="gpt-5.5-2026-04-23", thinking_level="high"),
         prompting=PromptingSettings(
             system_prompt_file="designer_system_prompt_openai.txt",
             system_prompt_sha256="abc",
@@ -144,7 +144,7 @@ def test_storage_repo_round_trips_records_collections_and_runs(tmp_path: Path) -
             created_at="2026-03-18T00:00:00Z",
             updated_at="2026-03-18T00:00:01Z",
             provider="openai",
-            model_id="gpt-5.4",
+            model_id="gpt-5.5-2026-04-23",
             sdk_package="sdk",
             status="success",
             prompt_count=1,
@@ -175,7 +175,7 @@ def test_workbench_records_write_local_gitignore_marker(tmp_path: Path) -> None:
             source=SourceRef(run_id="run_123"),
             sdk_package="sdk",
             provider="openai",
-            model_id="gpt-5.4",
+            model_id="gpt-5.5-2026-04-23",
             display=DisplayMetadata(title="Workbench", prompt_preview="workbench"),
             artifacts=RecordArtifacts(
                 prompt_txt="prompt.txt",
@@ -214,7 +214,7 @@ def test_run_store_upsert_result_compacts_latest_rows(tmp_path: Path) -> None:
             created_at="2026-03-18T00:00:00Z",
             updated_at="2026-03-18T00:00:01Z",
             provider="openai",
-            model_id="gpt-5.4",
+            model_id="gpt-5.5-2026-04-23",
             sdk_package="sdk",
             status="running",
             prompt_count=2,
@@ -263,7 +263,7 @@ def test_dataset_store_updates_cached_dataset_id_index_after_promote(tmp_path: P
         source=SourceRef(run_id="run_123", prompt_index=1),
         sdk_package="sdk",
         provider="openai",
-        model_id="gpt-5.4",
+        model_id="gpt-5.5-2026-04-23",
         display=DisplayMetadata(title="Existing", prompt_preview="existing"),
         artifacts=RecordArtifacts(
             prompt_txt="prompt.txt",
@@ -285,7 +285,7 @@ def test_dataset_store_updates_cached_dataset_id_index_after_promote(tmp_path: P
         source=SourceRef(run_id="run_123", prompt_index=2),
         sdk_package="sdk",
         provider="openai",
-        model_id="gpt-5.4",
+        model_id="gpt-5.5-2026-04-23",
         display=DisplayMetadata(title="New", prompt_preview="new"),
         artifacts=RecordArtifacts(
             prompt_txt="prompt.txt",

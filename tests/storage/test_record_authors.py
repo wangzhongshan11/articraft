@@ -43,7 +43,7 @@ def test_sync_record_authors_backfills_from_model_py_add_commit(tmp_path: Path) 
             source=SourceRef(run_id="run_author_001"),
             sdk_package="sdk",
             provider="openai",
-            model_id="gpt-5.4",
+            model_id="gpt-5.5-2026-04-23",
             display=DisplayMetadata(title="Author test", prompt_preview="author test"),
             artifacts=RecordArtifacts(
                 prompt_txt="prompt.txt",
@@ -101,7 +101,7 @@ def test_sync_record_authors_preserves_existing_author_without_mutation(tmp_path
             source=SourceRef(run_id="run_author_002"),
             sdk_package="sdk",
             provider="openai",
-            model_id="gpt-5.4",
+            model_id="gpt-5.5-2026-04-23",
             display=DisplayMetadata(title="Author keep", prompt_preview="author keep"),
             artifacts=RecordArtifacts(
                 prompt_txt="prompt.txt",
@@ -159,7 +159,7 @@ def test_sync_record_rated_by_backfills_from_latest_rating_line_blame(tmp_path: 
             source=SourceRef(run_id="run_rating_001"),
             sdk_package="sdk",
             provider="openai",
-            model_id="gpt-5.4",
+            model_id="gpt-5.5-2026-04-23",
             display=DisplayMetadata(title="Rating test", prompt_preview="rating test"),
             artifacts=RecordArtifacts(
                 prompt_txt="prompt.txt",
@@ -234,7 +234,7 @@ def test_sync_record_rated_by_updates_existing_value_when_rating_changes(tmp_pat
             source=SourceRef(run_id="run_rating_002"),
             sdk_package="sdk",
             provider="openai",
-            model_id="gpt-5.4",
+            model_id="gpt-5.5-2026-04-23",
             display=DisplayMetadata(title="Rating keep", prompt_preview="rating keep"),
             artifacts=RecordArtifacts(
                 prompt_txt="prompt.txt",
@@ -309,7 +309,7 @@ def test_sync_record_rated_by_ignores_secondary_rating_line_updates(tmp_path: Pa
             source=SourceRef(run_id="run_rating_003"),
             sdk_package="sdk",
             provider="openai",
-            model_id="gpt-5.4",
+            model_id="gpt-5.5-2026-04-23",
             display=DisplayMetadata(title="Secondary rating isolation", prompt_preview="secondary"),
             artifacts=RecordArtifacts(
                 prompt_txt="prompt.txt",
@@ -387,7 +387,7 @@ def test_sync_record_secondary_rated_by_clears_when_secondary_rating_is_null(
             source=SourceRef(run_id="run_rating_004"),
             sdk_package="sdk",
             provider="openai",
-            model_id="gpt-5.4",
+            model_id="gpt-5.5-2026-04-23",
             display=DisplayMetadata(title="Secondary rating clear", prompt_preview="secondary"),
             artifacts=RecordArtifacts(
                 prompt_txt="prompt.txt",
