@@ -1,3 +1,8 @@
+# Recipes use bash. On Windows, scripts/find-git-bash.cmd locates Git Bash (not the WSL stub).
+# Optional: set GIT_BASH to bash.exe if Git is installed elsewhere.
+set shell := ["bash", "-eu", "-o", "pipefail", "-c"]
+set windows-shell := ["scripts/find-git-bash.cmd", "-eu", "-o", "pipefail", "-c"]
+
 default:
     @just --list
 

@@ -10,6 +10,7 @@ from pathlib import Path
 
 from agent.cost import max_cost_usd_from_env, parse_max_cost_usd
 from agent.prompts import normalize_sdk_package
+from agent.providers.openai import DEFAULT_OPENAI_MODEL
 from agent.runner import run_from_input
 from agent.tools import build_initial_user_content, resolve_image_path
 from articraft.values import PROVIDER_VALUES, THINKING_LEVEL_VALUES
@@ -667,8 +668,8 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     run_single.add_argument(
         "--model-id",
-        default=None,
-        help="Optional model override. Defaults to the provider's current default.",
+        default=DEFAULT_OPENAI_MODEL,
+        help="Model ID for the generation run.",
     )
     run_single.add_argument(
         "--thinking-level",

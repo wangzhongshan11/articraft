@@ -38,6 +38,22 @@ def test_public_command_help_surfaces_nested_commands(
         assert fragment in output
 
 
+def test_viewer_npm_argv_uses_resolved_executable(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(
+        articraft_cli,
+        "which",
+        lambda name: r"D:\nvm\nodejs\npm.CMD" if name == "npm" else None,
+    )
+
+    assert articraft_cli._viewer_npm_argv("run", "build") == [
+        r"D:\nvm\nodejs\npm.CMD",
+        "--prefix",
+        "viewer/web",
+        "run",
+        "build",
+    ]
+
+
 def test_removed_legacy_console_subcommands_are_not_public() -> None:
     with pytest.raises(SystemExit) as exc_info:
         articraft_cli.main(["dataset", "init-storage"])

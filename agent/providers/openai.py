@@ -40,10 +40,10 @@ except ImportError:  # pragma: no cover
 logger = logging.getLogger(__name__)
 
 
-DEFAULT_OPENAI_MODEL = "gpt-5.5-2026-04-23"
+DEFAULT_OPENAI_MODEL = "gpt-5.4"
 _GPT_5_4_AND_5_5_DANGER_ZONE_TOKENS = 272_000
 _GPT_5_2_AND_5_3_CODEX_DANGER_ZONE_TOKENS = 280_000
-DEFAULT_OPENAI_COMPACTION_MODEL = "gpt-5.4-mini"
+DEFAULT_OPENAI_COMPACTION_MODEL = DEFAULT_OPENAI_MODEL
 
 
 def _load_cwd_dotenv_override() -> None:
@@ -138,6 +138,9 @@ class OpenAILLM:
                 # controlled by this wrapper rather than hidden nested backoff.
                 "max_retries": 0,
             }
+            base_url = os.environ.get("OPENAI_BASE_URL", "").strip()
+            if base_url:
+                client_kwargs["base_url"] = base_url.rstrip("/")
             if self.request_timeout_seconds and self.request_timeout_seconds > 0:
                 client_kwargs["timeout"] = float(self.request_timeout_seconds)
             try:
@@ -157,11 +160,12 @@ class OpenAILLM:
                 self._client = OpenAI(**client_kwargs)
                 self._client_is_async = False
 
-        base_url = os.environ.get("OPENAI_BASE_URL")
-        client_base_url = getattr(getattr(self, "_client", None), "base_url", None)
-        if not base_url and client_base_url is not None:
-            base_url = str(client_base_url)
-        self._responses_websocket_url = _responses_websocket_url(base_url)
+        resolved_base_url = os.environ.get("OPENAI_BASE_URL", "").strip().rstrip("/") or None
+        if resolved_base_url is None:
+            client_base_url = getattr(getattr(self, "_client", None), "base_url", None)
+            if client_base_url is not None:
+                resolved_base_url = str(client_base_url).rstrip("/")
+        self._responses_websocket_url = _responses_websocket_url(resolved_base_url)
 
         # Responses API expects a list of structured items; we keep the canonical
         # conversation in this format to avoid lossy conversions.

@@ -11,6 +11,7 @@ from shutil import which
 
 from agent import runner as agent_runner
 from agent.providers.factory import infer_provider_from_model_id
+from agent.providers.openai import DEFAULT_OPENAI_MODEL
 from articraft.values import PROVIDER_VALUES, THINKING_LEVEL_VALUES
 from cli import compile_all as compile_all_cli
 from cli import compile_record as compile_record_cli
@@ -24,7 +25,7 @@ from cli.common import provider_for_record_image, refresh_dataset_manifest_if_me
 from storage.repo import StorageRepo
 from storage.search import SearchIndex
 
-DEFAULT_MODEL = "gpt-5.5-2026-04-23"
+DEFAULT_MODEL = DEFAULT_OPENAI_MODEL
 DEFAULT_THINKING = "high"
 
 DatasetDispatchKey = tuple[str, str | None]
@@ -284,13 +285,21 @@ def _viewer_url(args: argparse.Namespace, *, dev_frontend: bool = False) -> str:
     return f"http://{args.host}:{port}{_normalize_viewer_target(args.target)}"
 
 
+def _viewer_npm_argv(*npm_args: str) -> list[str]:
+    """Resolve npm for subprocess on Windows (npm.cmd is not found by bare name)."""
+    npm = which("npm")
+    if npm is None:
+        raise RuntimeError("npm is required but was not found on PATH")
+    return [npm, "--prefix", "viewer/web", *npm_args]
+
+
 def _run_viewer(args: argparse.Namespace) -> int:
     if not which("npm"):
         print("npm is required for viewer/web. Install Node.js and npm first.")
         return 1
     node_modules = args.repo_root / "viewer" / "web" / "node_modules"
     if not node_modules.is_dir():
-        status = subprocess.call(["npm", "--prefix", "viewer/web", "install"], cwd=args.repo_root)
+        status = subprocess.call(_viewer_npm_argv("install"), cwd=args.repo_root)
         if status != 0:
             return status
     status = _ensure_viewer_inputs(args)
@@ -317,11 +326,11 @@ def _run_viewer(args: argparse.Namespace) -> int:
         try:
             print(f"Viewer URL: {_viewer_url(args, dev_frontend=True)}")
             return subprocess.call(
-                ["npm", "--prefix", "viewer/web", "run", "dev"], cwd=args.repo_root, env=env
+                _viewer_npm_argv("run", "dev"), cwd=args.repo_root, env=env
             )
         finally:
             api.terminate()
-    status = subprocess.call(["npm", "--prefix", "viewer/web", "run", "build"], cwd=args.repo_root)
+    status = subprocess.call(_viewer_npm_argv("run", "build"), cwd=args.repo_root)
     if status != 0:
         return status
     print(f"Viewer URL: {_viewer_url(args)}")

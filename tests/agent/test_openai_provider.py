@@ -358,15 +358,15 @@ def test_openai_default_request_timeout_is_15_minutes(
 def test_openai_default_model_is_latest_snapshot() -> None:
     provider = OpenAILLM(dry_run=True)
 
-    assert DEFAULT_OPENAI_MODEL == "gpt-5.5-2026-04-23"
-    assert provider.model_id == "gpt-5.5-2026-04-23"
+    assert DEFAULT_OPENAI_MODEL == "gpt-5.4"
+    assert provider.model_id == "gpt-5.4"
 
 
-def test_openai_default_compaction_model_is_mini() -> None:
+def test_openai_default_compaction_model_matches_main_model() -> None:
     provider = OpenAILLM(dry_run=True)
 
-    assert DEFAULT_OPENAI_COMPACTION_MODEL == "gpt-5.4-mini"
-    assert provider.compaction_model_id == "gpt-5.4-mini"
+    assert DEFAULT_OPENAI_COMPACTION_MODEL == DEFAULT_OPENAI_MODEL
+    assert provider.compaction_model_id == DEFAULT_OPENAI_MODEL
 
 
 def test_convert_tools_normalizes_function_schemas_for_responses_strict_mode() -> None:

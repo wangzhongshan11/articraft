@@ -1,0 +1,291 @@
+---
+title: '带倾头、气球打蛋器和关节控制器的工匠立式搅拌机'
+description: 'Base SDK 立式搅拌机示例：放样颈部与机头外壳、旋车搅拌碗、居中气球打蛋器、可倾机头、旋转轮毂、滑动调速与俯仰倾锁杆。'
+tags:
+  - sdk
+  - base sdk
+  - stand mixer
+  - artisan mixer
+  - kitchen appliance
+  - tilt head
+  - mixing bowl
+  - balloon whisk
+  - whisk attachment
+  - speed control
+  - tilt lock
+  - articulated controls
+  - place on surface
+  - section loft
+  - lathe geometry
+  - tube from spline points
+  - revolute articulation
+  - prismatic articulation
+  - continuous articulation
+---
+# 带倾头、气球打蛋器和关节控制器的工匠立式搅拌机
+
+本 Base SDK 示例是**风格化但机械可读**的立式搅拌机强参考：雕塑感机身、前置搅拌碗、逼真气球打蛋器组件、倾头运动，以及直接安装在曲面壳体上的关节控制件。适用于 `stand mixer`、`artisan mixer`、`tilt head`、`balloon whisk`、`speed slider`、`tilt lock`、`place_on_surface`、`section_loft`、`LatheGeometry` 等查询。
+
+**值得复制的建模模式：**
+
+- 用 `section_loft(...)` 做锥缩颈部与机头壳体，避免堆叠方块。
+- 用 `LatheGeometry.from_shell_profiles(...)` 做薄壁搅拌碗。
+- 用 `tube_from_spline_points(...)` 重复打蛋环线，并单独做箍圈与驱动轴。
+- 用 `place_on_surface(...)` 把控制件装在实际壳体几何上，而非近似 AABB 面。
+- 单台电器内混合关节类型：机头倾转与倾锁杆为旋转（revolute），轮毂连续旋转（continuous），调速为棱柱滑动（prismatic）。
+
+**倾头关节轴选择说明：** 机头壳体从后部枢轴沿局部 `+X` 向前伸出，因此特意选用 `axis=(0, -1, 0)`，使关节正角度**抬起**机头，而不是向碗内俯冲。
+
+```python
+from __future__ import annotations
+
+# User code should import every SDK/stdlib symbol it uses instead of relying on
+# hidden scaffold imports.
+# >>> USER_CODE_START
+import math
+from sdk import (
+    ArticulatedObject,
+    ArticulationType,
+    Box,
+    Cylinder,
+    CylinderGeometry,
+    ExtrudeGeometry,
+    Inertial,
+    LatheGeometry,
+    MotionLimits,
+    Origin,
+    mesh_from_geometry,
+    place_on_surface,
+    rounded_rect_profile,
+    section_loft,
+    tube_from_spline_points,
+)
+
+
+def build_object_model() -> ArticulatedObject:
+    model = ArticulatedObject(name="artisan_mixer")
+
+    body_metal = model.material("body_metal", rgba=(0.7, 0.1, 0.1, 1.0))
+    bowl_metal = model.material("bowl_metal", rgba=(0.9, 0.9, 0.9, 1.0))
+    plastic_black = model.material("plastic_black", rgba=(0.1, 0.1, 0.1, 1.0))
+
+    base_unit = model.part("base_unit")
+
+    bp_profile = rounded_rect_profile(0.35, 0.22, 0.05)
+    bp_geom = ExtrudeGeometry(bp_profile, 0.04)
+    bp_mesh = mesh_from_geometry(bp_geom, "base_plate")
+    base_unit.visual(
+        bp_mesh,
+        origin=Origin(xyz=(0.075, 0.0, 0.02)),
+        material=body_metal,
+        name="base_plate",
+    )
+
+    neck_s0 = [(x, y, 0.0) for x, y in rounded_rect_profile(0.1, 0.12, 0.03)]
+    neck_s1 = [(x, y, 0.18) for x, y in rounded_rect_profile(0.08, 0.1, 0.03)]
+    neck_s2 = [(x, y, 0.35) for x, y in rounded_rect_profile(0.06, 0.08, 0.025)]
+    neck_geom = section_loft([neck_s0, neck_s1, neck_s2])
+    neck_mesh = mesh_from_geometry(neck_geom, "neck")
+    base_unit.visual(
+        neck_mesh,
+        origin=Origin(xyz=(-0.06, 0.0, 0.04)),
+        material=body_metal,
+        name="neck",
+    )
+    base_unit.inertial = Inertial.from_geometry(Box((0.35, 0.22, 0.39)), mass=6.0)
+
+    bowl = model.part("bowl")
+    outer_prof = [(0.02, 0.0), (0.06, 0.01), (0.1, 0.06), (0.1, 0.15), (0.105, 0.16)]
+    inner_prof = [(0.0, 0.005), (0.055, 0.015), (0.095, 0.06), (0.095, 0.155)]
+    bowl_geom = LatheGeometry.from_shell_profiles(outer_prof, inner_prof, segments=48)
+    bowl_mesh = mesh_from_geometry(bowl_geom, "bowl")
+    bowl.visual(bowl_mesh, material=bowl_metal, name="bowl_shell")
+    bowl.inertial = Inertial.from_geometry(Cylinder(radius=0.1, length=0.16), mass=0.8)
+
+    model.articulation(
+        "base_to_bowl",
+        ArticulationType.FIXED,
+        parent=base_unit,
+        child=bowl,
+        origin=Origin(xyz=(0.12, 0.0, 0.04)),
+    )
+
+    head = model.part("head")
+
+    def yz_section(w: float, h: float, r: float, x: float) -> list[tuple[float, float, float]]:
+        return [(x, y, z) for z, y in rounded_rect_profile(h, w, r)]
+
+    head_s0 = yz_section(0.08, 0.1, 0.03, 0.0)
+    head_s1 = yz_section(0.14, 0.16, 0.05, 0.15)
+    head_s2 = yz_section(0.1, 0.12, 0.04, 0.35)
+    head_geom = section_loft([head_s0, head_s1, head_s2])
+    head_mesh = mesh_from_geometry(head_geom, "head")
+    head.visual(head_mesh, material=body_metal, name="head_shell")
+    head.inertial = Inertial.from_geometry(
+        Box((0.35, 0.16, 0.16)),
+        mass=4.0,
+        origin=Origin(xyz=(0.175, 0.0, 0.0)),
+    )
+
+    tilt_lock = model.part("tilt_lock")
+    tilt_lock.visual(
+        Cylinder(radius=0.006, length=0.008),
+        origin=Origin(xyz=(0.0, 0.0, 0.004)),
+        material=plastic_black,
+        name="tilt_lock_pivot",
+    )
+    tilt_lock.visual(
+        Cylinder(radius=0.0035, length=0.020),
+        origin=Origin(xyz=(0.012, 0.0, 0.010), rpy=(0.0, math.pi / 2.0, 0.0)),
+        material=plastic_black,
+        name="tilt_lock_handle",
+    )
+    tilt_lock.visual(
+        Cylinder(radius=0.0038, length=0.012),
+        origin=Origin(xyz=(0.020, 0.0, 0.016)),
+        material=plastic_black,
+        name="tilt_lock_tip",
+    )
+    tilt_lock.inertial = Inertial.from_geometry(
+        Box((0.030, 0.010, 0.028)),
+        mass=0.05,
+        origin=Origin(xyz=(0.014, 0.0, 0.012)),
+    )
+
+    speed_control = model.part("speed_control")
+    speed_control.visual(
+        Box((0.014, 0.008, 0.006)),
+        origin=Origin(xyz=(0.0, 0.0, 0.003)),
+        material=plastic_black,
+        name="speed_slider_base",
+    )
+    speed_control.visual(
+        Cylinder(radius=0.0035, length=0.016),
+        origin=Origin(xyz=(0.0, 0.0, 0.014)),
+        material=plastic_black,
+        name="speed_slider_stem",
+    )
+    speed_control.visual(
+        Cylinder(radius=0.004, length=0.016),
+        origin=Origin(xyz=(0.006, 0.0, 0.021), rpy=(0.0, math.pi / 2.0, 0.0)),
+        material=plastic_black,
+        name="speed_slider_grip",
+    )
+    speed_control.inertial = Inertial.from_geometry(
+        Box((0.026, 0.010, 0.030)),
+        mass=0.05,
+        origin=Origin(xyz=(0.006, 0.0, 0.015)),
+    )
+
+    model.articulation(
+        "neck_to_head",
+        ArticulationType.REVOLUTE,
+        parent=base_unit,
+        child=head,
+        origin=Origin(xyz=(-0.06, 0.0, 0.39)),
+        # Closed head geometry extends along +X from the rear pivot.
+        # -Y makes positive q tilt the head upward.
+        axis=(0.0, -1.0, 0.0),
+        motion_limits=MotionLimits(
+            effort=15.0,
+            velocity=1.0,
+            lower=0.0,
+            upper=math.radians(65),
+        ),
+    )
+
+    model.articulation(
+        "base_to_tilt_lock",
+        ArticulationType.REVOLUTE,
+        parent=base_unit,
+        child=tilt_lock,
+        origin=place_on_surface(
+            tilt_lock,
+            base_unit,
+            point_hint=(-0.055, 0.055, 0.255),
+            prefer_collisions=False,
+            child_prefer_collisions=False,
+        ),
+        axis=(1.0, 0.0, 0.0),
+        motion_limits=MotionLimits(effort=1.5, velocity=2.0, lower=-0.35, upper=0.35),
+    )
+
+    model.articulation(
+        "head_to_speed_control",
+        ArticulationType.PRISMATIC,
+        parent=head,
+        child=speed_control,
+        origin=place_on_surface(
+            speed_control,
+            head,
+            point_hint=(0.145, 0.075, 0.005),
+            prefer_collisions=False,
+            child_prefer_collisions=False,
+        ),
+        axis=(1.0, 0.0, 0.0),
+        motion_limits=MotionLimits(effort=1.0, velocity=0.08, lower=-0.012, upper=0.012),
+    )
+
+    hub = model.part("hub")
+    hub.visual(
+        Cylinder(radius=0.04, length=0.05),
+        origin=Origin(xyz=(0.0, 0.0, -0.025)),
+        material=plastic_black,
+        name="hub_shell",
+    )
+    hub.inertial = Inertial.from_geometry(Cylinder(radius=0.04, length=0.05), mass=0.3)
+
+    model.articulation(
+        "head_to_hub",
+        ArticulationType.CONTINUOUS,
+        parent=head,
+        child=hub,
+        origin=Origin(xyz=(0.18, 0.0, -0.05)),
+        axis=(0.0, 0.0, 1.0),
+        motion_limits=MotionLimits(effort=10.0, velocity=15.0),
+    )
+
+    whisk = model.part("whisk")
+    whisk_wires = []
+    num_loops = 8
+    for i in range(num_loops):
+        angle = i * math.pi / num_loops
+        c, s = math.cos(angle), math.sin(angle)
+        pts = [
+            (0.009 * c, 0.009 * s, -0.050),
+            (0.020 * c, 0.020 * s, -0.068),
+            (0.034 * c, 0.034 * s, -0.100),
+            (0.045 * c, 0.045 * s, -0.132),
+            (0.0, 0.0, -0.155),
+            (-0.045 * c, -0.045 * s, -0.132),
+            (-0.034 * c, -0.034 * s, -0.100),
+            (-0.020 * c, -0.020 * s, -0.068),
+            (-0.009 * c, -0.009 * s, -0.050),
+        ]
+        whisk_wires.append(tube_from_spline_points(pts, radius=0.0016))
+
+    final_whisk_geom = CylinderGeometry(radius=0.0055, height=0.038).translate(0.0, 0.0, -0.019)
+    final_whisk_geom.merge(CylinderGeometry(radius=0.0085, height=0.022).translate(0.0, 0.0, -0.045))
+    final_whisk_geom.merge(CylinderGeometry(radius=0.012, height=0.020).translate(0.0, 0.0, -0.066))
+    for w_geom in whisk_wires[1:]:
+        final_whisk_geom.merge(w_geom)
+    final_whisk_geom.merge(whisk_wires[0])
+
+    whisk_mesh = mesh_from_geometry(final_whisk_geom, "whisk")
+    whisk.visual(whisk_mesh, material=bowl_metal, name="whisk_shell")
+    whisk.inertial = Inertial.from_geometry(Cylinder(radius=0.05, length=0.16), mass=0.2)
+
+    model.articulation(
+        "hub_to_whisk",
+        ArticulationType.FIXED,
+        parent=hub,
+        child=whisk,
+        origin=Origin(xyz=(0.0, 0.0, -0.05)),
+    )
+
+    return model
+
+
+object_model = build_object_model()
+# >>> USER_CODE_END
+```

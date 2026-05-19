@@ -675,6 +675,39 @@ def _linux_available_memory_bytes() -> int | None:
     return None
 
 
+def _windows_memory_bytes() -> tuple[int, int] | None:
+    if os.name != "nt":
+        return None
+    try:
+        import ctypes
+        from ctypes import wintypes
+
+        class MEMORYSTATUSEX(ctypes.Structure):
+            _fields_ = [
+                ("dwLength", wintypes.DWORD),
+                ("dwMemoryLoad", wintypes.DWORD),
+                ("ullTotalPhys", ctypes.c_ulonglong),
+                ("ullAvailPhys", ctypes.c_ulonglong),
+                ("ullTotalPageFile", ctypes.c_ulonglong),
+                ("ullAvailPageFile", ctypes.c_ulonglong),
+                ("ullTotalVirtual", ctypes.c_ulonglong),
+                ("ullAvailVirtual", ctypes.c_ulonglong),
+                ("ullAvailExtendedVirtual", ctypes.c_ulonglong),
+            ]
+
+        stat = MEMORYSTATUSEX()
+        stat.dwLength = ctypes.sizeof(MEMORYSTATUSEX)
+        if not ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(stat)):
+            return None
+        total = int(stat.ullTotalPhys)
+        available = int(stat.ullAvailPhys)
+        if total <= 0 or available <= 0:
+            return None
+        return total, available
+    except Exception:
+        return None
+
+
 def _macos_available_memory_bytes() -> int | None:
     try:
         output = subprocess.check_output(
@@ -708,6 +741,9 @@ def _macos_available_memory_bytes() -> int | None:
 
 
 def _total_memory_bytes() -> int | None:
+    windows_memory = _windows_memory_bytes()
+    if windows_memory is not None:
+        return windows_memory[0]
     try:
         page_size = int(os.sysconf("SC_PAGE_SIZE"))
         page_count = int(os.sysconf("SC_PHYS_PAGES"))
@@ -724,6 +760,9 @@ def _available_memory_bytes() -> int | None:
     available = _macos_available_memory_bytes()
     if available is not None:
         return available
+    windows_memory = _windows_memory_bytes()
+    if windows_memory is not None:
+        return windows_memory[1]
     return _total_memory_bytes()
 
 
@@ -804,6 +843,10 @@ def _resolve_worker_count(
         )
         if memory_cap is not None:
             resolved = min(resolved, max(1, memory_cap))
+        else:
+            # Unknown host memory (historically common on Windows) — avoid spawning
+            # one worker per queued record, which can OOM and break CadQuery/VTK imports.
+            resolved = min(resolved, _logical_cpu_count())
         if open_file_cap is not None:
             resolved = min(resolved, open_file_cap.worker_cap)
         return resolved
