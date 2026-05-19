@@ -177,7 +177,7 @@ Provider keys go in `.env`:
 
 Optional defaults include `ARTICRAFT_MAX_COST_USD` for per-run budgets and provider-specific knobs such as OpenAI transport/cache settings, Anthropic cache settings, and OpenRouter token/retry settings.
 
-`articraft generate` defaults to `gpt-5.5-2026-04-23` with `--thinking-level high`. Provider inference handles known OpenAI, Gemini, Claude, and OpenRouter-style model IDs; pass `--provider` explicitly when using an ambiguous model name.
+`articraft generate` defaults to `gpt-5.4` with `--thinking-level high`. Provider inference handles known OpenAI, Gemini, Claude, and OpenRouter-style model IDs; pass `--provider` explicitly when using an ambiguous model name.
 
 ## Paper Dataset Counts
 

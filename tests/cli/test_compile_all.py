@@ -51,6 +51,53 @@ def test_compile_all_class_aware_queue_prefers_worker_class() -> None:
     assert third.record_id == "wheel"
 
 
+def test_windows_memory_bytes_returns_positive_on_nt(monkeypatch) -> None:
+    monkeypatch.setattr(compile_all.os, "name", "nt")
+    memory = compile_all._windows_memory_bytes()
+    assert memory is not None
+    total, available = memory
+    assert total > 0
+    assert available > 0
+
+
+def test_resolve_worker_count_auto_uses_memory_cap_on_windows(monkeypatch) -> None:
+    monkeypatch.setattr(
+        compile_all,
+        "_windows_memory_bytes",
+        lambda: (32 * compile_all._GIB, 16 * compile_all._GIB),
+    )
+    monkeypatch.setattr(compile_all, "_open_file_worker_cap", lambda: None)
+
+    resolved = compile_all._resolve_worker_count(
+        "auto",
+        candidate_count=100,
+        reserve_mem_gb=2.0,
+        mem_per_worker_gb=compile_all._DEFAULT_VISUAL_MEM_PER_WORKER_GB,
+        target="visual",
+    )
+
+    # (16 GiB available - 2 GiB reserve) / 1.25 GiB per worker ~= 11
+    assert resolved == 11
+
+
+def test_resolve_worker_count_auto_falls_back_to_cpu_when_memory_unknown(
+    monkeypatch,
+) -> None:
+    monkeypatch.setattr(compile_all, "_auto_worker_memory_cap", lambda **_kwargs: None)
+    monkeypatch.setattr(compile_all, "_open_file_worker_cap", lambda: None)
+    monkeypatch.setattr(compile_all.os, "cpu_count", lambda: 16)
+
+    resolved = compile_all._resolve_worker_count(
+        "auto",
+        candidate_count=100,
+        reserve_mem_gb=2.0,
+        mem_per_worker_gb=compile_all._DEFAULT_VISUAL_MEM_PER_WORKER_GB,
+        target="visual",
+    )
+
+    assert resolved == 16
+
+
 def test_compile_all_worker_uses_materialization_component(
     tmp_path: Path,
     monkeypatch,

@@ -63,7 +63,7 @@ Strongly prefer registering your configured model and thinking/reasoning level. 
 
 ```bash
 uv run articraft external init --agent claude-code --model-id claude-sonnet-4-6 --thinking-level high "washing machine"
-uv run articraft external init --agent codex --model-id gpt-5.5-2026-04-23 --thinking-level high "washing machine"
+uv run articraft external init --agent codex --model-id gpt-5.4 --thinking-level high "washing machine"
 ```
 
 The command prints `record_id` and `record_dir`. Edit only that generated record unless the user explicitly asks for broader repository changes.
