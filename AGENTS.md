@@ -20,6 +20,7 @@ Use `uv run articraft ...` for product workflows, and `just` for local setup/che
 
 ## Generation, Dataset, and Viewer Commands
 - External agent data generation must follow [`EXTERNAL_AGENT_DATA.md`](EXTERNAL_AGENT_DATA.md). If the user asks Codex, Claude Code, or another external harness to generate Articraft data, use `uv run articraft external ...`; do not manually create records or use an alternate workflow.
+- OpenCode and Codex project wiring: [`opencode.json`](opencode.json), [`.opencode/`](.opencode/), [`.codex/config.toml`](.codex/config.toml), and [`docs/OPENCODE_CODEX_SETUP_c.md`](docs/OPENCODE_CODEX_SETUP_c.md) (setup guide, Chinese).
 - `uv run articraft generate "prompt text"` runs generation in workbench mode.
 - `uv run articraft generate --model gemini-3-flash-preview --image reference.png "prompt text"` overrides model and adds a reference image.
 - `uv run articraft draft "prompt text"` creates a draft workbench record without running generation.

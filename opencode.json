@@ -1,0 +1,26 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "default_agent": "articraft",
+  "instructions": [
+    "AGENTS.md",
+    "EXTERNAL_AGENT_DATA.md",
+    "CLAUDE.md"
+  ],
+  "watcher": {
+    "ignore": [
+      "data/cache/**",
+      "data/records/**/traces/**",
+      ".venv/**",
+      "viewer/web/node_modules/**",
+      "viewer/web/dist/**",
+      "**/__pycache__/**",
+      ".uv-cache/**",
+      ".ruff_cache/**",
+      ".pytest_cache/**"
+    ]
+  },
+  "permission": {
+    "edit": "allow",
+    "bash": "allow"
+  }
+}

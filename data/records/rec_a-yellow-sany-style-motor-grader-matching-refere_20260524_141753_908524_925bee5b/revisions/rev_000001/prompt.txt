@@ -1,0 +1,10 @@
+Reference image: assembly-agent-v2/cases/挖掘机/preview.png (yellow SANY-style motor grader on black background).
+
+Build a wheeled motor grader (not a tracked excavator) with:
+- articulated rear/ front frame hinge behind the cab
+- operator cab with glass and black roof
+- center grading blade on a circle mount with yaw and pitch
+- one front axle with two large wheels and two rear tandem axles with four wheels
+- industrial yellow body, black exhaust stacks and upper beam cover
+
+Primary user-facing articulation: frame_articulation, blade_circle_yaw, blade_pitch, and continuous wheel spin on all six wheels.

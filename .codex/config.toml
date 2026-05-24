@@ -1,0 +1,12 @@
+# Articraft project-scoped Codex configuration.
+# Loads when this repository is marked trusted in Codex.
+# Put API keys and personal model defaults in ~/.codex/config.toml .
+
+project_doc_fallback_filenames = [
+  "EXTERNAL_AGENT_DATA.md",
+  "CLAUDE.md",
+]
+project_doc_max_bytes = 65536
+
+# Optional: open generated model.py files in Cursor from Codex citations
+# file_opener = "cursor"

@@ -26,6 +26,7 @@
 | [CLAUDE.md](CLAUDE.md) | [CLAUDE_c.md](CLAUDE_c.md) | Claude Code 专用指南（与 AGENTS 对齐） |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | [CONTRIBUTING_c.md](CONTRIBUTING_c.md) | 贡献流程、PR、数据工作流、提交规范 |
 | [EXTERNAL_AGENT_DATA.md](EXTERNAL_AGENT_DATA.md) | [EXTERNAL_AGENT_DATA_c.md](EXTERNAL_AGENT_DATA_c.md) | 外部 Agent（Cursor/Codex 等）写入数据集的标准流程 |
+| [docs/OPENCODE_CODEX_SETUP_c.md](docs/OPENCODE_CODEX_SETUP_c.md) | （仅中文） | OpenCode / Codex 项目配置、`opencode.json`、`.opencode/`、`.codex/` 使用说明 |
 | [SECURITY.md](SECURITY.md) | [SECURITY_c.md](SECURITY_c.md) | 安全策略：执行不可信 `model.py` 的风险 |
 | [docs/architecture.md](docs/architecture.md) | [docs/architecture_c.md](docs/architecture_c.md) | 架构与模块划分、Workbench vs 数据集批处理 |
 | [docs/record_editing.md](docs/record_editing.md) | [docs/record_editing_c.md](docs/record_editing_c.md) | Fork 编辑已有记录、目录结构、查看器历史 |
