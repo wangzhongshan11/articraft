@@ -4,7 +4,8 @@ import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 
 const apiHost = process.env.ARTICRAFT_VIEWER_API_HOST ?? "127.0.0.1";
-const apiPort = process.env.ARTICRAFT_VIEWER_API_PORT ?? "8765";
+// Keep in sync with viewer/api/defaults.py DEFAULT_VIEWER_PORT
+const apiPort = process.env.ARTICRAFT_VIEWER_API_PORT ?? "8876";
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],

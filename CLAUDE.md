@@ -73,7 +73,7 @@ Viewer/frontend workflows:
 uv run articraft compile-all
 just viewer
 just viewer-dev
-uv run uvicorn viewer.api.app:app --reload --host 127.0.0.1 --port 8765
+uv run uvicorn viewer.api.app:app --reload --host 127.0.0.1 --port 8876
 npm --prefix viewer/web run dev
 npm --prefix viewer/web run build
 npm --prefix viewer/web run lint
@@ -150,8 +150,8 @@ Resume uses the same `batch_spec_id`, stable `row_id` values, prior allocations 
 - Use `uv run articraft compile-all --target full` when collision-inclusive URDFs are needed in bulk.
 - Add `--strict` only when validation-heavy geometry checks should fail the bulk compile.
 - Use `uv run articraft compile data/records/<id>` for one-off full record recompiles; add `--target visual` for viewer-only assets.
-- `just viewer` builds `viewer/web` and serves it through FastAPI on `127.0.0.1:8765`.
-- `just viewer-dev` starts uvicorn plus the Vite dev server, with Vite on `:5173` proxying API requests to `:8765`.
+- `just viewer` builds `viewer/web` and serves it through FastAPI on `127.0.0.1:8876`.
+- `just viewer-dev` starts uvicorn plus the Vite dev server, with Vite on `:5173` proxying API requests to `:8876`.
 
 ## Code Style
 

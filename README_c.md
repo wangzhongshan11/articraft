@@ -90,8 +90,8 @@ uv run articraft generate --model gemini-3-flash-preview --max-cost-usd 1.5 "Cre
 just viewer
 ```
 
-- 默认在 `http://127.0.0.1:8765` 提供服务（会先构建 `viewer/web`）。
-- 开发时可用 `just viewer-dev`：Vite 在 `:5173`，API 代理到 `:8765`。
+- 默认在 `http://127.0.0.1:8876` 提供服务（会先构建 `viewer/web`）。
+- 开发时可用 `just viewer-dev`：Vite 在 `:5173`，API 代理到 `:8876`。
 
 **提示：** 批量浏览前可先运行 `uv run articraft compile-all` 加速可视化材质化。
 

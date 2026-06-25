@@ -7,6 +7,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 
+from viewer.api.defaults import DEFAULT_VIEWER_HOST, DEFAULT_VIEWER_PORT
 from viewer.api.file_resolver import ViewerFileResolver
 from viewer.api.frontend import install_frontend_routes
 from viewer.api.routes import (
@@ -28,14 +29,21 @@ def _resolve_repo_root(repo_root: Path | None) -> Path:
     return Path.cwd().resolve()
 
 
+def _viewer_api_port() -> str:
+    return os.getenv("ARTICRAFT_VIEWER_API_PORT", DEFAULT_VIEWER_PORT)
+
+
 def _install_middleware(app: FastAPI) -> None:
+    api_port = _viewer_api_port()
+    api_host = os.getenv("ARTICRAFT_VIEWER_API_HOST", DEFAULT_VIEWER_HOST)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=[
             "http://127.0.0.1:5173",
             "http://localhost:5173",
-            "http://127.0.0.1:8765",
-            "http://localhost:8765",
+            f"http://127.0.0.1:{api_port}",
+            f"http://localhost:{api_port}",
+            f"http://{api_host}:{api_port}",
         ],
         allow_credentials=True,
         allow_methods=["*"],

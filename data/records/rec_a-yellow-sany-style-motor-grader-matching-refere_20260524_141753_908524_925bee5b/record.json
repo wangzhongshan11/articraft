@@ -32,7 +32,7 @@
     "provenance_json": "revisions/rev_000001/provenance.json",
     "cost_json": null,
     "inputs_dir": "revisions/rev_000001/inputs",
-    "traces_dir": "revisions/rev_000001/traces"
+    "traces_dir": null
   },
   "hashes": {
     "prompt_sha256": "154e0b8884b6009a768522ac042e21206c45b18223083a7319c04301c336ed00",

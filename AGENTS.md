@@ -35,7 +35,7 @@ Use `uv run articraft ...` for product workflows, and `just` for local setup/che
 - `uv run articraft dataset batch data/batch_specs/<batch-id>.csv --row-concurrency 8 --subprocess-concurrency auto --resume` resumes the latest prior run for that spec.
 - `uv run articraft workbench search-index` rebuilds the viewer search index.
 - `just viewer` starts the built viewer flow; `just viewer-dev` starts uvicorn and Vite together.
-- `uv run uvicorn viewer.api.app:app --reload --host 127.0.0.1 --port 8765` starts only the API.
+- `uv run uvicorn viewer.api.app:app --reload --host 127.0.0.1 --port 8876` starts only the API.
 - `npm --prefix viewer/web run dev`, `build`, `lint`, and `typecheck` run frontend-only workflows.
 
 ## Coding Style & Naming Conventions

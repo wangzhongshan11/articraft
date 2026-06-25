@@ -6,6 +6,7 @@
     "EXTERNAL_AGENT_DATA.md",
     "CLAUDE.md"
   ],
+  "small_model": "qunhe-litellm/gpt-5.4",
   "watcher": {
     "ignore": [
       "data/cache/**",

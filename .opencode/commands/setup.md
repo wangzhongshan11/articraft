@@ -23,6 +23,6 @@ uv run articraft init
 ```
 
 3. Report `uv run articraft status` output.
-4. Tell the user how to start the viewer: `just viewer-dev` (http://127.0.0.1:5173/) or `just viewer` (http://127.0.0.1:8765/).
+4. Tell the user how to start the viewer: `just viewer-dev` (http://127.0.0.1:5173/) or `just viewer` (http://127.0.0.1:8876/).
 
 Do not ask unnecessary questions; fix obvious failures and continue.

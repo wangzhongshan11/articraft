@@ -85,7 +85,7 @@ uv run articraft workbench search-index
 uv run articraft compile-all
 just viewer
 just viewer-dev
-uv run uvicorn viewer.api.app:app --reload --host 127.0.0.1 --port 8765
+uv run uvicorn viewer.api.app:app --reload --host 127.0.0.1 --port 8876
 npm --prefix viewer/web run dev
 npm --prefix viewer/web run build
 npm --prefix viewer/web run lint
@@ -159,8 +159,8 @@ npm --prefix viewer/web run typecheck
 | 批量需要含碰撞 URDF | `compile-all --target full` |
 | 重度几何失败即停 | 加 `--strict` |
 | 单记录完整重编译 | `compile data/records/<id>`；仅查看器加 `--target visual` |
-| 生产式本地查看 | `just viewer` → `127.0.0.1:8765` |
-| 热重载开发 | `just viewer-dev`（Vite `:5173` 代理 API `:8765`） |
+| 生产式本地查看 | `just viewer` → `127.0.0.1:8876` |
+| 热重载开发 | `just viewer-dev`（Vite `:5173` 代理 API `:8876`） |
 
 ---
 

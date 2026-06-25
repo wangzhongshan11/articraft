@@ -62,7 +62,7 @@
 | `uv run articraft workbench search-index` | 重建查看器搜索索引 |
 | `just viewer` | 构建并启动完整查看器流程 |
 | `just viewer-dev` | uvicorn + Vite 并行开发 |
-| `uv run uvicorn viewer.api.app:app --reload --host 127.0.0.1 --port 8765` | 仅 API |
+| `uv run uvicorn viewer.api.app:app --reload --host 127.0.0.1 --port 8876` | 仅 API |
 | `npm --prefix viewer/web run dev\|build\|lint\|typecheck` | 仅前端工作流 |
 
 ---

@@ -7,7 +7,7 @@ default:
     @just --list
 
 host := "127.0.0.1"
-port := "8765"
+port := "8876"
 
 uv-version-check:
     @version="$(uv --version | awk '{print $2}')"; \

@@ -24,6 +24,7 @@ from cli import workbench as workbench_cli
 from cli.common import provider_for_record_image, refresh_dataset_manifest_if_member
 from storage.repo import StorageRepo
 from storage.search import SearchIndex
+from viewer.api.defaults import DEFAULT_VIEWER_HOST, DEFAULT_VIEWER_PORT
 
 DEFAULT_MODEL = DEFAULT_OPENAI_MODEL
 DEFAULT_THINKING = "high"
@@ -690,8 +691,8 @@ def _build_parser() -> argparse.ArgumentParser:
     viewer = subparsers.add_parser("viewer", help="Start the local viewer.")
     _add_repo_root(viewer)
     viewer.add_argument("--dev", action="store_true")
-    viewer.add_argument("--host", default="127.0.0.1")
-    viewer.add_argument("--port", default="8765")
+    viewer.add_argument("--host", default=DEFAULT_VIEWER_HOST)
+    viewer.add_argument("--port", default=DEFAULT_VIEWER_PORT)
     viewer.add_argument("--target", default="/")
     viewer.set_defaults(func=_run_viewer)
 
@@ -699,8 +700,8 @@ def _build_parser() -> argparse.ArgumentParser:
     _add_repo_root(view)
     view.add_argument("record")
     view.add_argument("--dev", action="store_true")
-    view.add_argument("--host", default="127.0.0.1")
-    view.add_argument("--port", default="8765")
+    view.add_argument("--host", default=DEFAULT_VIEWER_HOST)
+    view.add_argument("--port", default=DEFAULT_VIEWER_PORT)
     view.set_defaults(func=_run_view)
 
     data = subparsers.add_parser("data", help="Data validation commands.")
