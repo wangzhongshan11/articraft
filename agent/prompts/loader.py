@@ -3,7 +3,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 
+from agent.providers.openai_edit_mode import openai_use_function_edit_tools
 from agent.workspace_docs import load_sdk_docs_reference as _load_sdk_docs_reference
+from articraft.values import ProviderName, normalize_provider_name
 from sdk._profiles import get_sdk_profile
 
 DESIGNER_PROMPT_NAME = "designer_system_prompt.txt"
@@ -54,6 +56,17 @@ def resolve_system_prompt_path(
     profile_prompt_name = profile.prompt_name_for_provider(provider_norm)
     if path.name in default_names and profile_prompt_name is not None:
         candidates.append(path.with_name(profile_prompt_name))
+        try:
+            normalized_provider = normalize_provider_name(provider_norm)
+        except ValueError:
+            normalized_provider = None
+        if (
+            normalized_provider is ProviderName.OPENAI
+            and openai_use_function_edit_tools()
+            and profile_prompt_name == profile.openai_prompt_name
+        ):
+            # Proxy OpenAI endpoints use replace/write_file tools; align prompt contract.
+            candidates.insert(0, path.with_name(profile.gemini_prompt_name))
     candidates.append(path)
 
     for candidate in candidates:

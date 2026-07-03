@@ -145,3 +145,63 @@ def test_read_file_tool_reads_from_offset_to_eof_when_limit_missing(tmp_path: Pa
 
     model_output = asyncio.run(_run())
     assert model_output == "L2: beta\nL3: gamma"
+
+
+def test_read_file_tool_reads_cadquery_docs_with_utf8_encoding(tmp_path: Path) -> None:
+    async def _run() -> tuple[str | None, str]:
+        repo_root = Path(__file__).resolve().parents[2]
+        model_path = tmp_path / "model.py"
+        model_path.write_text("alpha\n", encoding="utf-8")
+        workspace = build_virtual_workspace(
+            repo_root,
+            model_file_path=model_path,
+            sdk_package="sdk",
+        )
+
+        tool = ReadFileTool()
+        invocation = await tool.build(
+            {
+                "path": "docs/sdk/references/cadquery/workplane.md",
+                "offset": 1,
+                "limit": 5,
+            }
+        )
+        invocation.bind_virtual_workspace(workspace)
+        result = await invocation.execute()
+        return result.error, str(result.output or "")
+
+    error, output = asyncio.run(_run())
+
+    assert error is None
+    assert "Workplane" in output
+    assert "\u2014" in output or "—" in output
+
+
+def test_read_file_tool_reads_cadquery_docs_with_utf8_encoding(tmp_path: Path) -> None:
+    async def _run() -> tuple[str | None, str]:
+        repo_root = Path(__file__).resolve().parents[2]
+        model_path = tmp_path / "model.py"
+        model_path.write_text("alpha\n", encoding="utf-8")
+        workspace = build_virtual_workspace(
+            repo_root,
+            model_file_path=model_path,
+            sdk_package="sdk",
+        )
+
+        tool = ReadFileTool()
+        invocation = await tool.build(
+            {
+                "path": "docs/sdk/references/cadquery/workplane.md",
+                "offset": 1,
+                "limit": 5,
+            }
+        )
+        invocation.bind_virtual_workspace(workspace)
+        result = await invocation.execute()
+        return result.error, str(result.output or "")
+
+    error, output = asyncio.run(_run())
+
+    assert error is None
+    assert "Workplane" in output
+    assert "\u2014" in output or "—" in output

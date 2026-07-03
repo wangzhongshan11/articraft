@@ -9,7 +9,7 @@ from agent.cost import max_cost_usd_from_env, parse_max_cost_usd
 from agent.prompts import normalize_sdk_package
 from agent.runner import create_workbench_draft_record, edit_record, rerun_record_in_place
 from agent.tools import resolve_image_path
-from articraft.values import PROVIDER_VALUES
+from articraft.values import DEFAULT_THINKING_LEVEL, PROVIDER_VALUES
 from cli.common import (
     add_data_root_argument,
     provider_for_record_image,
@@ -99,7 +99,7 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     init_record.add_argument(
         "--thinking-level",
-        default="high",
+        default=DEFAULT_THINKING_LEVEL,
         help="Thinking level metadata to attach to the draft provenance.",
     )
     init_record.add_argument(

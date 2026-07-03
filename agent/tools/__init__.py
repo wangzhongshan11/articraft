@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any
 
 from agent.prompts import normalize_sdk_package
+from agent.providers.openai_edit_mode import openai_use_function_edit_tools
 from agent.runtime_limits import BatchRuntimeLimits
 from agent.tools.apply_patch import ApplyPatchFreeformTool
 from agent.tools.base import (
@@ -70,7 +71,7 @@ def build_tool_registry(
 ) -> ToolRegistry:
     provider_norm = normalize_provider_name(provider)
     package = normalize_sdk_package(sdk_package)
-    if provider_norm is ProviderName.OPENAI:
+    if provider_norm is ProviderName.OPENAI and not openai_use_function_edit_tools():
         tools: list[BaseDeclarativeTool] = [
             ReadFileTool(),
             ApplyPatchFreeformTool(),

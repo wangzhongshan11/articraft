@@ -3,7 +3,8 @@ from __future__ import annotations
 import re
 
 SLUG_RE = re.compile(r"^[a-z0-9][a-z0-9_]*$")
-RECORD_ID_RE = re.compile(r"^rec_[A-Za-z0-9_.-]+$")
+# Unicode letters (including CJK) are allowed in record IDs for localized prompts.
+RECORD_ID_RE = re.compile(r"^rec_[\w.-]+$", re.UNICODE)
 SAFE_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]*$")
 
 
@@ -31,6 +32,8 @@ def validate_record_id(value: str | None, *, label: str = "record_id") -> str:
     record_id = str(value or "").strip()
     if not record_id:
         raise ValueError(f"{label} is required.")
+    if "/" in record_id or "\\" in record_id:
+        raise ValueError(f"{label} must not contain path separators.")
     if not RECORD_ID_RE.fullmatch(record_id):
         raise ValueError(
             f"{label} must start with rec_ and contain only letters, digits, "

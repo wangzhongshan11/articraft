@@ -20,6 +20,7 @@ PROVIDER_VALUES = tuple(provider.value for provider in ProviderName)
 PROVIDER_VALUE_SET = frozenset(PROVIDER_VALUES)
 THINKING_LEVEL_VALUES = tuple(level.value for level in ThinkingLevel)
 THINKING_LEVEL_VALUE_SET = frozenset(THINKING_LEVEL_VALUES)
+DEFAULT_THINKING_LEVEL = ThinkingLevel.MED.value
 
 
 def normalize_provider_name(provider: str | ProviderName | None) -> ProviderName:

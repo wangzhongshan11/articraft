@@ -12,7 +12,7 @@ from shutil import which
 from agent import runner as agent_runner
 from agent.providers.factory import infer_provider_from_model_id
 from agent.providers.openai import DEFAULT_OPENAI_MODEL
-from articraft.values import PROVIDER_VALUES, THINKING_LEVEL_VALUES
+from articraft.values import PROVIDER_VALUES, THINKING_LEVEL_VALUES, DEFAULT_THINKING_LEVEL
 from cli import compile_all as compile_all_cli
 from cli import compile_record as compile_record_cli
 from cli import dataset as dataset_cli
@@ -27,7 +27,7 @@ from storage.search import SearchIndex
 from viewer.api.defaults import DEFAULT_VIEWER_HOST, DEFAULT_VIEWER_PORT
 
 DEFAULT_MODEL = DEFAULT_OPENAI_MODEL
-DEFAULT_THINKING = "high"
+DEFAULT_THINKING = DEFAULT_THINKING_LEVEL
 
 DatasetDispatchKey = tuple[str, str | None]
 DatasetArgBuilder = Callable[[argparse.Namespace], list[str]]
@@ -352,12 +352,14 @@ def _run_viewer(args: argparse.Namespace) -> int:
 
 
 def _run_view(args: argparse.Namespace) -> int:
+    from urllib.parse import quote
+
     try:
         record_id = _resolve_record_id(args.repo_root, args.record)
     except ValueError as exc:
         print(str(exc))
         return 1
-    args.target = f"/viewer?record={record_id}"
+    args.target = f"/viewer?record={quote(record_id, safe='')}"
     return _run_viewer(args)
 
 

@@ -20,8 +20,12 @@ def test_validate_category_slug_rejects_path_like_values() -> None:
 
 def test_validate_record_id_rejects_path_like_values() -> None:
     assert validate_record_id("rec_hinge_001") == "rec_hinge_001"
+    assert (
+        validate_record_id("rec_生成一个微波炉模型装配-要求尽量精美贴切_20260703_7ab28376")
+        == "rec_生成一个微波炉模型装配-要求尽量精美贴切_20260703_7ab28376"
+    )
 
-    for value in ("../rec_hinge_001", "hinge_001", "rec_bad/name", ""):
+    for value in ("../rec_hinge_001", "hinge_001", "rec_bad/name", "rec_bad\\name", ""):
         with pytest.raises(ValueError):
             validate_record_id(value)
 

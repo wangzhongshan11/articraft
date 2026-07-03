@@ -3,6 +3,7 @@ from __future__ import annotations
 import pytest
 
 from articraft.values import (
+    DEFAULT_THINKING_LEVEL,
     ProviderName,
     ThinkingLevel,
     infer_provider_from_model_id,
@@ -32,6 +33,7 @@ def test_normalize_provider_name_rejects_unknown_provider() -> None:
 
 
 def test_thinking_level_helpers_keep_public_med_spelling() -> None:
+    assert DEFAULT_THINKING_LEVEL == ThinkingLevel.MED.value
     assert normalize_thinking_level("medium") is ThinkingLevel.MED
     assert provider_reasoning_level("med") == "medium"
     assert reasoning_level_alias("med") == "medium"

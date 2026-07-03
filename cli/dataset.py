@@ -13,7 +13,7 @@ from agent.prompts import normalize_sdk_package
 from agent.providers.openai import DEFAULT_OPENAI_MODEL
 from agent.runner import run_from_input
 from agent.tools import build_initial_user_content, resolve_image_path
-from articraft.values import PROVIDER_VALUES, THINKING_LEVEL_VALUES
+from articraft.values import PROVIDER_VALUES, THINKING_LEVEL_VALUES, DEFAULT_THINKING_LEVEL
 from cli.common import add_data_root_argument, warn_if_post_commit_hook_missing
 from storage.categories import CategoryStore
 from storage.collections import CollectionStore
@@ -673,7 +673,7 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     run_single.add_argument(
         "--thinking-level",
-        default="high",
+        default=DEFAULT_THINKING_LEVEL,
         choices=THINKING_LEVEL_VALUES,
         help="Thinking budget level for the generation run.",
     )

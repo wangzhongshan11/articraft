@@ -6,11 +6,14 @@ from pathlib import Path
 import pytest
 from pydantic import ValidationError
 
+from agent.prompts.loader import resolve_system_prompt_path
 from agent.tools import build_tool_registry
 from agent.workspace_docs import build_virtual_workspace
 
 
-def test_provider_tool_registry_schemas() -> None:
+def test_provider_tool_registry_schemas(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("OPENAI_BASE_URL", raising=False)
+    monkeypatch.setenv("ARTICRAFT_OPENAI_FUNCTION_EDIT_TOOLS", "custom")
     openai_registry = build_tool_registry("openai", sdk_package="sdk")
     gemini_registry = build_tool_registry("gemini", sdk_package="sdk")
 
@@ -102,6 +105,34 @@ def test_provider_tool_registry_schemas() -> None:
     assert "short lexical query" in (
         find_examples_schema["function"]["parameters"]["properties"]["query"]["description"].lower()
     )
+
+
+def test_openai_registry_uses_function_edit_tools_on_proxy(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("OPENAI_BASE_URL", "https://oneapi-beta.example.com/v1")
+    monkeypatch.setenv("ARTICRAFT_OPENAI_FUNCTION_EDIT_TOOLS", "auto")
+    registry = build_tool_registry("openai", sdk_package="sdk")
+    assert set(registry.get_all_tool_names()) == {
+        "read_file",
+        "replace",
+        "write_file",
+        "compile_model",
+        "probe_model",
+        "find_examples",
+    }
+
+
+def test_resolve_openai_prompt_uses_gemini_tools_on_proxy(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("OPENAI_BASE_URL", "https://oneapi-beta.example.com/v1")
+    monkeypatch.setenv("ARTICRAFT_OPENAI_FUNCTION_EDIT_TOOLS", "auto")
+    repo_root = Path(__file__).resolve().parents[2]
+    resolved = resolve_system_prompt_path(
+        "designer_system_prompt.txt",
+        provider="openai",
+        repo_root=repo_root,
+    )
+    assert resolved.name == "designer_system_prompt_gemini.txt"
 
 
 def test_tool_registry_rejects_hidden_file_path_parameter() -> None:

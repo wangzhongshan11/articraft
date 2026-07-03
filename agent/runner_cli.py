@@ -24,7 +24,7 @@ from agent.single_run import run_from_input
 from agent.tools import build_initial_user_content as _build_initial_user_content
 from agent.tools import resolve_image_path as _resolve_image_path
 from agent.tui.single_run import LLMWaitAwareStreamHandler
-from articraft.values import PROVIDER_VALUES, THINKING_LEVEL_VALUES, ProviderName
+from articraft.values import PROVIDER_VALUES, THINKING_LEVEL_VALUES, ProviderName, DEFAULT_THINKING_LEVEL
 
 
 def _load_qc_blurb_text(qc_blurb_path: Optional[str], *, repo_root: Path) -> Optional[str]:
@@ -128,7 +128,7 @@ def main(
     )
     parser.add_argument(
         "--thinking",
-        default="high",
+        default=DEFAULT_THINKING_LEVEL,
         choices=THINKING_LEVEL_VALUES,
         help="Thinking budget level.",
     )
