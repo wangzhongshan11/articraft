@@ -1,0 +1,23 @@
+{
+  "case_id": "F04",
+  "suite": "02_Furniture_10",
+  "case_dir": "test_cases/02_Furniture_10/cases/F04_wooden_bench",
+  "prompt_file": "cases/F04_wooden_bench/prompt_en.txt",
+  "reference_image": "test_cases/02_Furniture_10/cases/F04_wooden_bench/reference_F04_wooden_bench.png",
+  "image_used": "test_cases/02_Furniture_10/cases/F04_wooden_bench/reference_F04_wooden_bench.png",
+  "run_id": "case_f04_20260708t065429z",
+  "record_id": "bench_f04_20260708t065429z",
+  "status": "success",
+  "message": null,
+  "artifact_dir": "test_cases/02_Furniture_10/cases/F04_wooden_bench/runs/20260708T065429Z",
+  "provider": "openai",
+  "model_id": "gpt-5.5",
+  "thinking_level": "med",
+  "turn_count": 11,
+  "tool_call_count": 12,
+  "compile_attempt_count": 3,
+  "total_cost_usd": 0.742226,
+  "compile_target": "visual",
+  "compile_error": null,
+  "compile_warnings": []
+}

@@ -162,6 +162,46 @@ class StagingEntryResponse(BaseModel):
     persisted_record: RecordSummaryResponse | None = None
 
 
+class CaseRunEntryResponse(BaseModel):
+    case_run_path: str
+    case_id: str
+    suite: str | None = None
+    case_dir: str
+    run_token: str
+    title: str
+    prompt_preview: str
+    status: str | None = None
+    message: str | None = None
+    provider: str | None = None
+    model_id: str | None = None
+    thinking_level: str | None = None
+    turn_count: int | None = None
+    tool_call_count: int | None = None
+    compile_attempt_count: int | None = None
+    total_cost_usd: float | None = None
+    run_id: str | None = None
+    record_id: str | None = None
+    updated_at: str | None = None
+    has_prompt: bool = False
+    has_model_script: bool = False
+    model_script_updated_at: str | None = None
+    has_checkpoint_urdf: bool = False
+    checkpoint_updated_at: str | None = None
+    has_cost: bool = False
+    has_traces: bool = False
+    has_compile_report: bool = False
+    prompt_file: str | None = None
+    reference_image: str | None = None
+    compile_target: str | None = None
+    compile_error: str | None = None
+
+
+class OpenCaseRunFolderResponse(BaseModel):
+    status: str
+    case_run_path: str
+    path: str
+
+
 class RunSummaryResponse(BaseModel):
     run_id: str
     run_mode: str | None = None
@@ -283,6 +323,7 @@ class ViewerBootstrapResponse(BaseModel):
     workbench_entries: list[WorkbenchEntryResponse]
     dataset_entries: list[DatasetEntryResponse]
     staging_entries: list[StagingEntryResponse]
+    case_run_entries: list[CaseRunEntryResponse] = Field(default_factory=list)
     runs: list[RunSummaryResponse]
     supercategories: list[SupercategoryOptionResponse] = Field(default_factory=list)
 

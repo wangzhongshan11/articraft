@@ -1,0 +1,13 @@
+{
+  "case_id": "10_hinged_waffle_press",
+  "fdm_profile": "../../config/fdm_baseline.json",
+  "checks": [
+    "grid_array",
+    "open_close_collision_probe",
+    "plate_clearance_ge_1mm",
+    "shell_wall_ge_2mm"
+  ],
+  "required_mesh_outputs": "STL or 3MF per printable part",
+  "must_declare_orientation": true,
+  "must_declare_support_strategy": true
+}

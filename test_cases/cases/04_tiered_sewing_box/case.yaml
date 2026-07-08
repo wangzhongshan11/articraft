@@ -1,0 +1,101 @@
+schema_version: "articraft-complex-3dprint-case.v1"
+case_id: "04_tiered_sewing_box"
+title_zh: "多层铰接缝纫收纳盒"
+title_en: "Tiered articulated sewing box"
+benchmark_tier: "complex_articulated_3d_print"
+objective: "Generate a complete tabletop-scale articulated printable model with semantic parts, URDF joints, source, printable mesh exports, and provenance evidence."
+safety_scope: "Desktop-scale non-safety-critical demonstrator only; not for real flight, cutting, heating, adult/child load bearing or medical use."
+input:
+  language: "zh"
+  prompt_file: "prompt_zh.md"
+  optional_reference_policy: "Reference images may be used only if their provenance is recorded."
+kinematics:
+  required_joints:
+    -
+      name: "lid_hinge"
+      type: "revolute"
+      parent: "<declare_in_output>"
+      child: "<declare_in_output>"
+      axis: "<declare_in_output>"
+      limit_deg:
+        - 0.0
+        - 110.0
+    -
+      name: "tray_left_hinge"
+      type: "revolute"
+      parent: "<declare_in_output>"
+      child: "<declare_in_output>"
+      axis: "<declare_in_output>"
+      limit_deg:
+        - 0.0
+        - 95.0
+    -
+      name: "tray_right_hinge"
+      type: "revolute"
+      parent: "<declare_in_output>"
+      child: "<declare_in_output>"
+      axis: "<declare_in_output>"
+      limit_deg:
+        - 0.0
+        - 95.0
+    -
+      name: "linkage_left"
+      type: "revolute"
+      parent: "<declare_in_output>"
+      child: "<declare_in_output>"
+      axis: "<declare_in_output>"
+      limit_deg:
+        - 0.0
+        - 95.0
+    -
+      name: "linkage_right"
+      type: "revolute"
+      parent: "<declare_in_output>"
+      child: "<declare_in_output>"
+      axis: "<declare_in_output>"
+      limit_deg:
+        - 0.0
+        - 95.0
+  motion_probe_states:
+    - "rest"
+    - "mid"
+    - "limit"
+  must_be_collision_checked: true
+deliverables:
+  required:
+    - "model.py"
+    - "model.urdf"
+    - "part_manifest.json"
+    - "joint_manifest.json"
+    - "events.jsonl"
+    - "artifact_manifest.json"
+    - "run_metadata.json"
+    - "metrics.json"
+  preferred:
+    - "model.step"
+    - "model.3mf"
+    - "preview.png"
+    - "orthographic_views"
+    - "motion_probe_images"
+  print_mesh:
+    - "STL or 3MF per printable part"
+  min_semantic_parts: 7
+manufacturing:
+  fdm_profile: "../../config/fdm_baseline.json"
+  required_checks:
+    - "box_wall_ge_2mm"
+    - "multi_joint_collision_probe"
+    - "pin_clearance_ge_0.30mm"
+    - "printed_part_manifest"
+evaluation_focus:
+  - "multi-part hierarchy"
+  - "linked opening mechanism"
+  - "thin-wall enclosure"
+  - "collision-free deployment"
+  - "BOM traceability"
+scoring:
+  kinematics: 30
+  part_semantics: 15
+  printability: 25
+  artifact_completeness: 15
+  traceability: 15

@@ -9,7 +9,7 @@ import logging
 from pathlib import Path
 from typing import Any, Awaitable, Callable, Optional
 
-from agent.compiler import compile_urdf_report_maybe_timeout
+from agent.compiler import compile_urdf_report_maybe_timeout, persist_compile_success_artifacts
 from agent.defaults import resolve_max_turns
 from agent.harness import ArticraftAgent
 from agent.models import CompileReport as AgentCompileReport
@@ -81,6 +81,8 @@ async def run_from_input(
     record_author: str | None = None,
     persist_run_metadata: bool = True,
     persist_run_result: bool = True,
+    persist_record: bool = True,
+    cleanup_staging_dir: bool | None = None,
     execute_single_run_func: ExecuteSingleRun | None = None,
     resolve_record_author_func: Callable[[Path], str | None] = _resolve_runtime_record_author,
 ) -> int:
@@ -113,6 +115,8 @@ async def run_from_input(
         record_author=record_author,
         persist_run_metadata=persist_run_metadata,
         persist_run_result=persist_run_result,
+        persist_record=persist_record,
+        cleanup_staging_dir=cleanup_staging_dir,
         execute_single_run_func=execute_single_run_func,
         resolve_record_author_func=resolve_record_author_func,
     )
@@ -149,6 +153,8 @@ async def run_from_input_impl(
     record_author: str | None = None,
     persist_run_metadata: bool = True,
     persist_run_result: bool = True,
+    persist_record: bool = True,
+    cleanup_staging_dir: bool | None = None,
     execute_single_run_func: ExecuteSingleRun | None = None,
     resolve_record_author_func: Callable[[Path], str | None] = _resolve_runtime_record_author,
 ) -> RunExecutionOutcome:
@@ -229,6 +235,8 @@ async def run_from_input_impl(
         record_author=resolved_record_author,
         persist_run_metadata=persist_run_metadata,
         persist_run_result=persist_run_result,
+        persist_record=persist_record,
+        cleanup_staging_dir=cleanup_staging_dir,
     )
 
 
@@ -268,9 +276,10 @@ async def execute_single_run(
     run_id: str | None = None,
     persist_run_metadata: bool = True,
     persist_run_result: bool = True,
+    persist_record: bool = True,
     update_dataset_manifest: bool = True,
     reconcile_category_after_success: bool = True,
-    cleanup_staging_dir: bool = True,
+    cleanup_staging_dir: bool | None = None,
     existing_record: dict | None = None,
     workbench_entry: dict | None = None,
     dataset_entry: dict | None = None,
@@ -287,6 +296,9 @@ async def execute_single_run(
     compile_report_func: CompileReportFunc = compile_urdf_report_maybe_timeout,
     write_success_record_func: WriteSuccessRecord = write_success_record,
 ) -> RunExecutionOutcome:
+    resolved_cleanup_staging_dir = (
+        cleanup_staging_dir if cleanup_staging_dir is not None else persist_record
+    )
     resolved_context = context or await asyncio.to_thread(
         _build_single_run_context,
         repo_root=resolved_repo_root,
@@ -504,96 +516,109 @@ async def execute_single_run(
         final_code = resolved_context.script_path.read_text(encoding="utf-8")
 
     try:
-        loaded_existing_record = existing_record
-        if loaded_existing_record is None:
-            maybe_record = await asyncio.to_thread(
-                record_store.load_record, resolved_context.record_id
+        record_dir: Path | None = None
+        if persist_record:
+            loaded_existing_record = existing_record
+            if loaded_existing_record is None:
+                maybe_record = await asyncio.to_thread(
+                    record_store.load_record, resolved_context.record_id
+                )
+                loaded_existing_record = maybe_record if isinstance(maybe_record, dict) else None
+            loaded_dataset_entry = dataset_entry
+            if loaded_dataset_entry is None:
+                maybe_entry = await asyncio.to_thread(
+                    storage_repo.read_json,
+                    storage_repo.layout.record_dataset_entry_path(resolved_context.record_id),
+                )
+                loaded_dataset_entry = maybe_entry if isinstance(maybe_entry, dict) else None
+            loaded_workbench_entry = workbench_entry
+            if loaded_workbench_entry is None and collection == "workbench":
+                maybe_workbench_entry = await asyncio.to_thread(
+                    _load_workbench_entry,
+                    collections,
+                    record_id=resolved_context.record_id,
+                )
+                loaded_workbench_entry = (
+                    maybe_workbench_entry if isinstance(maybe_workbench_entry, dict) else None
+                )
+
+            write_request = SuccessRecordWrite(
+                repo_root=resolved_repo_root,
+                storage_repo=storage_repo,
+                record_store=record_store,
+                collections=collections,
+                datasets=datasets,
+                context=resolved_context,
+                prompt_text=prompt_text,
+                display_prompt=display_prompt or prompt_text,
+                image_path=image_path,
+                provider=provider,
+                model_id=actual_model_id,
+                openai_transport=openai_transport,
+                thinking_level=thinking_level,
+                max_turns=resolved_max_turns,
+                system_prompt_path=loaded_system_prompt_path,
+                sdk_package=sdk_package,
+                openai_reasoning_summary=openai_reasoning_summary,
+                max_cost_usd=max_cost_usd,
+                final_code=final_code,
+                urdf_xml=urdf_xml,
+                compile_warnings=compile_warnings,
+                turn_count=result.turn_count,
+                tool_call_count=result.tool_call_count,
+                compile_attempt_count=result.compile_attempt_count,
+                label=label,
+                tags=list(tags or []),
+                collection=collection,
+                category_slug=category_slug,
+                dataset_id=dataset_id,
+                batch_spec_id=batch_spec_id,
+                row_id=row_id,
+                prompt_index=prompt_index,
+                existing_record=loaded_existing_record,
+                workbench_entry=loaded_workbench_entry,
+                dataset_entry=loaded_dataset_entry,
+                update_dataset_manifest=update_dataset_manifest,
+                record_author=record_author,
+                lineage=lineage,
+                revision_parent=revision_parent,
+                revision_seed=revision_seed,
+                inherited_inputs=inherited_inputs,
             )
-            loaded_existing_record = maybe_record if isinstance(maybe_record, dict) else None
-        loaded_dataset_entry = dataset_entry
-        if loaded_dataset_entry is None:
-            maybe_entry = await asyncio.to_thread(
-                storage_repo.read_json,
-                storage_repo.layout.record_dataset_entry_path(resolved_context.record_id),
-            )
-            loaded_dataset_entry = maybe_entry if isinstance(maybe_entry, dict) else None
-        loaded_workbench_entry = workbench_entry
-        if loaded_workbench_entry is None and collection == "workbench":
-            maybe_workbench_entry = await asyncio.to_thread(
-                _load_workbench_entry,
-                collections,
-                record_id=resolved_context.record_id,
-            )
-            loaded_workbench_entry = (
-                maybe_workbench_entry if isinstance(maybe_workbench_entry, dict) else None
+            record_dir = await asyncio.to_thread(write_success_record_func, write_request)
+            if reconcile_category_after_success and collection == "dataset" and category_slug:
+                persisted_record = await asyncio.to_thread(
+                    record_store.load_record,
+                    resolved_context.record_id,
+                )
+                if not isinstance(persisted_record, dict):
+                    raise ValueError(
+                        f"Failed to load persisted record {resolved_context.record_id}"
+                    )
+                await asyncio.to_thread(
+                    reconcile_category_metadata,
+                    storage_repo,
+                    StorageQueries(storage_repo),
+                    category_slug=category_slug,
+                    category_title=None,
+                    record=persisted_record,
+                    now=_utc_now(),
+                    sequence=(
+                        parse_canonical_dataset_sequence(dataset_id, category_slug)
+                        if dataset_id
+                        else None
+                    ),
+                )
+        else:
+            await asyncio.to_thread(
+                persist_compile_success_artifacts,
+                urdf_xml=urdf_xml,
+                urdf_out=resolved_context.checkpoint_urdf_path,
+                outputs_root=resolved_context.staging_dir,
+                previous_sig=None,
             )
 
-        write_request = SuccessRecordWrite(
-            repo_root=resolved_repo_root,
-            storage_repo=storage_repo,
-            record_store=record_store,
-            collections=collections,
-            datasets=datasets,
-            context=resolved_context,
-            prompt_text=prompt_text,
-            display_prompt=display_prompt or prompt_text,
-            image_path=image_path,
-            provider=provider,
-            model_id=actual_model_id,
-            openai_transport=openai_transport,
-            thinking_level=thinking_level,
-            max_turns=resolved_max_turns,
-            system_prompt_path=loaded_system_prompt_path,
-            sdk_package=sdk_package,
-            openai_reasoning_summary=openai_reasoning_summary,
-            max_cost_usd=max_cost_usd,
-            final_code=final_code,
-            urdf_xml=urdf_xml,
-            compile_warnings=compile_warnings,
-            turn_count=result.turn_count,
-            tool_call_count=result.tool_call_count,
-            compile_attempt_count=result.compile_attempt_count,
-            label=label,
-            tags=list(tags or []),
-            collection=collection,
-            category_slug=category_slug,
-            dataset_id=dataset_id,
-            batch_spec_id=batch_spec_id,
-            row_id=row_id,
-            prompt_index=prompt_index,
-            existing_record=loaded_existing_record,
-            workbench_entry=loaded_workbench_entry,
-            dataset_entry=loaded_dataset_entry,
-            update_dataset_manifest=update_dataset_manifest,
-            record_author=record_author,
-            lineage=lineage,
-            revision_parent=revision_parent,
-            revision_seed=revision_seed,
-            inherited_inputs=inherited_inputs,
-        )
-        record_dir = await asyncio.to_thread(write_success_record_func, write_request)
-        if reconcile_category_after_success and collection == "dataset" and category_slug:
-            persisted_record = await asyncio.to_thread(
-                record_store.load_record,
-                resolved_context.record_id,
-            )
-            if not isinstance(persisted_record, dict):
-                raise ValueError(f"Failed to load persisted record {resolved_context.record_id}")
-            await asyncio.to_thread(
-                reconcile_category_metadata,
-                storage_repo,
-                StorageQueries(storage_repo),
-                category_slug=category_slug,
-                category_title=None,
-                record=persisted_record,
-                now=_utc_now(),
-                sequence=(
-                    parse_canonical_dataset_sequence(dataset_id, category_slug)
-                    if dataset_id
-                    else None
-                ),
-            )
-        if cleanup_staging_dir:
+        if resolved_cleanup_staging_dir:
             await asyncio.to_thread(_remove_tree_if_exists, resolved_context.staging_dir)
     except Exception as exc:
         logger.error("Failed to persist record: %s", exc)
@@ -607,15 +632,21 @@ async def execute_single_run(
         )
 
     finished_at = _utc_now()
-    result_row = {
+    result_row: dict[str, Any] = {
         "record_id": resolved_context.record_id,
         "status": "success",
-        "record_dir": _relative_to_repo(record_dir, resolved_repo_root),
         "turn_count": result.turn_count,
         "tool_call_count": result.tool_call_count,
         "compile_attempt_count": result.compile_attempt_count,
         "revision_id": resolved_context.revision_id,
     }
+    if record_dir is not None:
+        result_row["record_dir"] = _relative_to_repo(record_dir, resolved_repo_root)
+    else:
+        result_row["staging_dir"] = _relative_to_repo(
+            resolved_context.staging_dir,
+            resolved_repo_root,
+        )
     if persist_run_metadata:
         await asyncio.to_thread(
             run_store.write_run,
@@ -647,8 +678,11 @@ async def execute_single_run(
         )
     if persist_run_result:
         await asyncio.to_thread(run_store.append_result, resolved_context.run_id, result_row)
-    logger.info("Wrote record to %s", record_dir)
-    logger.info("Wrote URDF to %s", resolved_context.record_urdf_path)
+    if record_dir is not None:
+        logger.info("Wrote record to %s", record_dir)
+        logger.info("Wrote URDF to %s", resolved_context.record_urdf_path)
+    else:
+        logger.info("Staging artifacts at %s", resolved_context.staging_dir)
     return RunExecutionOutcome(
         exit_code=0,
         run_id=resolved_context.run_id,

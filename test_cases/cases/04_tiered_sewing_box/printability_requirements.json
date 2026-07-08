@@ -1,0 +1,13 @@
+{
+  "case_id": "04_tiered_sewing_box",
+  "fdm_profile": "../../config/fdm_baseline.json",
+  "checks": [
+    "box_wall_ge_2mm",
+    "multi_joint_collision_probe",
+    "pin_clearance_ge_0.30mm",
+    "printed_part_manifest"
+  ],
+  "required_mesh_outputs": "STL or 3MF per printable part",
+  "must_declare_orientation": true,
+  "must_declare_support_strategy": true
+}

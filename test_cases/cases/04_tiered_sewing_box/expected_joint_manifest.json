@@ -1,0 +1,60 @@
+{
+  "schema_version": "expected-joints.v1",
+  "required_joints": [
+    {
+      "name": "lid_hinge",
+      "type": "revolute",
+      "parent": "<declare_in_output>",
+      "child": "<declare_in_output>",
+      "axis": "<declare_in_output>",
+      "limit_deg": [
+        0.0,
+        110.0
+      ]
+    },
+    {
+      "name": "tray_left_hinge",
+      "type": "revolute",
+      "parent": "<declare_in_output>",
+      "child": "<declare_in_output>",
+      "axis": "<declare_in_output>",
+      "limit_deg": [
+        0.0,
+        95.0
+      ]
+    },
+    {
+      "name": "tray_right_hinge",
+      "type": "revolute",
+      "parent": "<declare_in_output>",
+      "child": "<declare_in_output>",
+      "axis": "<declare_in_output>",
+      "limit_deg": [
+        0.0,
+        95.0
+      ]
+    },
+    {
+      "name": "linkage_left",
+      "type": "revolute",
+      "parent": "<declare_in_output>",
+      "child": "<declare_in_output>",
+      "axis": "<declare_in_output>",
+      "limit_deg": [
+        0.0,
+        95.0
+      ]
+    },
+    {
+      "name": "linkage_right",
+      "type": "revolute",
+      "parent": "<declare_in_output>",
+      "child": "<declare_in_output>",
+      "axis": "<declare_in_output>",
+      "limit_deg": [
+        0.0,
+        95.0
+      ]
+    }
+  ]
+}

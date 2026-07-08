@@ -1,0 +1,13 @@
+{
+  "case_id": "07_compound_pliers",
+  "fdm_profile": "../../config/fdm_baseline.json",
+  "checks": [
+    "jaw_alignment_probe",
+    "open_close_motion",
+    "pin_clearance_ge_0.30mm",
+    "rounded_edges"
+  ],
+  "required_mesh_outputs": "STL or 3MF per printable part",
+  "must_declare_orientation": true,
+  "must_declare_support_strategy": true
+}

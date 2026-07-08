@@ -13,6 +13,7 @@ from storage.repo import StorageRepo
 from storage.search import SearchIndex
 from storage.supercategories import SupercategoryStore
 from viewer.api.browse_index import DatasetBrowseIndex
+from viewer.api.store_case_runs import ViewerCaseRunsStore
 from viewer.api.store_common import (
     DashboardRecord,
     MaterializeRecordAssetsResult,
@@ -137,5 +138,6 @@ class ViewerStore:
         self.taxonomy = ViewerTaxonomyStore(self)
         self.promotions = ViewerPromotionStore(self)
         self.runs = ViewerRunsStore(self)
+        self.case_runs = ViewerCaseRunsStore(self)
         self.stats = ViewerStatsStore(self)
         self.mutations = ViewerMutationStore(self)

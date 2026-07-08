@@ -1,4 +1,4 @@
-import type { RecordSummary, RunSummary, StagingEntry, ViewerBootstrap } from "@/lib/types";
+import type { RecordSummary, RunSummary, StagingEntry, CaseRunEntry, ViewerBootstrap } from "@/lib/types";
 
 export function findRecordInBootstrap(
   bootstrap: ViewerBootstrap | null,
@@ -34,4 +34,12 @@ export function findRunInBootstrap(
 ): RunSummary | null {
   if (!bootstrap || !runId) return null;
   return bootstrap.runs.find((run) => run.run_id === runId) ?? null;
+}
+
+export function findCaseRunEntryInBootstrap(
+  bootstrap: ViewerBootstrap | null,
+  caseRunPath: string,
+): CaseRunEntry | null {
+  if (!bootstrap) return null;
+  return bootstrap.case_run_entries.find((entry) => entry.case_run_path === caseRunPath) ?? null;
 }

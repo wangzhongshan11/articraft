@@ -2,8 +2,10 @@ import { useCallback, useEffect, useMemo, useState, type JSX } from "react";
 import { Copy, FolderOpen, RotateCcw, Star } from "lucide-react";
 
 import {
+  fetchCaseRunFile,
   fetchRecordFile,
   fetchStagingFile,
+  openCaseRunFolder,
   openRecordFolder,
   openStagingFolder,
   saveRecordRating,
@@ -11,7 +13,7 @@ import {
 } from "@/lib/api";
 import { formatCost } from "@/lib/dashboard-stats";
 import { buildRecordPath, buildRepoPath, copyTextToClipboard } from "@/lib/record-path";
-import { findStagingEntryInBootstrap } from "@/lib/record-summary";
+import { findCaseRunEntryInBootstrap, findStagingEntryInBootstrap } from "@/lib/record-summary";
 import { useViewer, useViewerDispatch } from "@/lib/viewer-context";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -362,17 +364,27 @@ export function InspectPanel({
   const [stagingCostStatus, setStagingCostStatus] = useState<"idle" | "loading" | "loaded" | "unavailable">("idle");
 
   const isStaging = selection?.kind === "staging";
+  const isCaseRun = selection?.kind === "case_run";
   const stagingEntry = isStaging
     ? findStagingEntryInBootstrap(bootstrap, selection.runId, selection.recordId)
     : null;
+  const caseRunEntry =
+    isCaseRun && selection?.kind === "case_run"
+      ? findCaseRunEntryInBootstrap(bootstrap, selection.caseRunPath)
+      : null;
   const record = selection?.kind === "record" ? selectedRecordSummary : null;
   const joints = useMemo(() => urdfSpec?.joints ?? [], [urdfSpec?.joints]);
   const movableJointCount = joints.filter(isMovableJoint).length;
   const recordPath = bootstrap && selectedRecordId ? buildRecordPath(bootstrap.repo_root, selectedRecordId) : null;
   const stagingPath =
     bootstrap && stagingEntry ? buildRepoPath(bootstrap.repo_root, stagingEntry.staging_dir) : (stagingEntry?.staging_dir ?? null);
+  const caseRunFolderPath =
+    bootstrap && caseRunEntry
+      ? buildRepoPath(bootstrap.repo_root, caseRunEntry.case_run_path)
+      : (caseRunEntry?.case_run_path ?? null);
   const stagingSelectionKey =
     selection?.kind === "staging" ? `${selection.runId}:${selection.recordId}` : null;
+  const caseRunSelectionKey = selection?.kind === "case_run" ? selection.caseRunPath : null;
   const recordSelectionKey = selection?.kind === "record" ? selection.recordId : null;
   const hasSelectedRecord = Boolean(selectedRecordId && record);
   const stagingRecordId = stagingEntry?.record_id ?? null;
@@ -380,6 +392,10 @@ export function InspectPanel({
   const stagingHasPrompt = stagingEntry?.has_prompt ?? false;
   const stagingHasCost = stagingEntry?.has_cost ?? false;
   const stagingUpdatedAt = stagingEntry?.updated_at ?? null;
+  const caseRunPath = caseRunEntry?.case_run_path ?? null;
+  const caseRunHasPrompt = caseRunEntry?.has_prompt ?? false;
+  const caseRunHasCost = caseRunEntry?.has_cost ?? false;
+  const caseRunUpdatedAt = caseRunEntry?.updated_at ?? null;
 
   const { rootLinks, jointsByParent } = useMemo(() => {
     const nextMap = new Map<string, UrdfJoint[]>();
@@ -395,6 +411,36 @@ export function InspectPanel({
   }, [joints]);
 
   useEffect(() => {
+    if (isCaseRun && caseRunPath) {
+      if (!caseRunHasPrompt) {
+        setPromptText(null);
+        setPromptStatus("unavailable");
+        return;
+      }
+
+      let cancelled = false;
+      setPromptText(null);
+      setPromptStatus("loading");
+
+      fetchCaseRunFile(caseRunPath, "prompt.txt")
+        .then((text) => {
+          if (cancelled) return;
+          const normalized = text.trim();
+          setPromptText(normalized || null);
+          setPromptStatus(normalized ? "loaded" : "unavailable");
+        })
+        .catch(() => {
+          if (!cancelled) {
+            setPromptText(null);
+            setPromptStatus("unavailable");
+          }
+        });
+
+      return () => {
+        cancelled = true;
+      };
+    }
+
     if (isStaging && stagingRunId && stagingRecordId) {
       // Load prompt for staging entry
       if (!stagingHasPrompt) {
@@ -454,7 +500,11 @@ export function InspectPanel({
       cancelled = true;
     };
   }, [
+    caseRunHasPrompt,
+    caseRunPath,
+    caseRunSelectionKey,
     hasSelectedRecord,
+    isCaseRun,
     isStaging,
     recordSelectionKey,
     selectedRecordId,
@@ -465,6 +515,38 @@ export function InspectPanel({
   ]);
 
   useEffect(() => {
+    if (isCaseRun && caseRunPath) {
+      if (!caseRunHasCost) {
+        setStagingCostUsd(caseRunEntry?.total_cost_usd ?? null);
+        setStagingCostStatus(caseRunEntry?.total_cost_usd != null ? "loaded" : "unavailable");
+        return;
+      }
+
+      let cancelled = false;
+      setStagingCostStatus("loading");
+
+      fetchCaseRunFile(caseRunPath, "cost.json")
+        .then((text) => {
+          if (cancelled) {
+            return;
+          }
+          setStagingCostUsd(extractTotalCostUsd(text));
+          setStagingCostStatus("loaded");
+        })
+        .catch(() => {
+          if (!cancelled) {
+            setStagingCostUsd(caseRunEntry?.total_cost_usd ?? null);
+            setStagingCostStatus(
+              caseRunEntry?.total_cost_usd != null ? "loaded" : "unavailable",
+            );
+          }
+        });
+
+      return () => {
+        cancelled = true;
+      };
+    }
+
     if (!isStaging || !stagingRunId || !stagingRecordId) {
       setStagingCostUsd(null);
       setStagingCostStatus("idle");
@@ -498,7 +580,20 @@ export function InspectPanel({
     return () => {
       cancelled = true;
     };
-  }, [isStaging, stagingHasCost, stagingRecordId, stagingRunId, stagingSelectionKey, stagingUpdatedAt]);
+  }, [
+    caseRunEntry?.total_cost_usd,
+    caseRunHasCost,
+    caseRunPath,
+    caseRunSelectionKey,
+    caseRunUpdatedAt,
+    isCaseRun,
+    isStaging,
+    stagingHasCost,
+    stagingRecordId,
+    stagingRunId,
+    stagingSelectionKey,
+    stagingUpdatedAt,
+  ]);
 
   useEffect(() => {
     setHoveredRating(null);
@@ -594,7 +689,7 @@ export function InspectPanel({
   }, [dispatch, record, savingSecondaryRating, selectedRecordId]);
 
   async function handleCopyRecordPath(): Promise<void> {
-    const pathToCopy = isStaging ? stagingPath : recordPath;
+    const pathToCopy = isCaseRun ? caseRunFolderPath : isStaging ? stagingPath : recordPath;
     if (!pathToCopy) {
       setCopyState("error");
       return;
@@ -609,6 +704,16 @@ export function InspectPanel({
   }
 
   async function handleOpenRecordFolder(): Promise<void> {
+    if (isCaseRun && caseRunPath) {
+      try {
+        await openCaseRunFolder(caseRunPath);
+        setOpenState("opened");
+      } catch {
+        setOpenState("error");
+      }
+      return;
+    }
+
     if (isStaging && stagingEntry) {
       try {
         await openStagingFolder(stagingEntry.run_id, stagingEntry.record_id);
@@ -825,7 +930,151 @@ export function InspectPanel({
     );
   }
 
+  // ── Case run inspect view ──
+  if (isCaseRun && caseRunEntry) {
+    return (
+      <ScrollArea className="h-full min-w-0">
+        <div className="min-w-0 space-y-5 pb-3">
+          <section>
+            <SectionLabel>Prompt</SectionLabel>
+            {promptStatus === "idle" || promptStatus === "loading" ? (
+              <div className="space-y-1.5">
+                <Skeleton className="h-3 w-full" />
+                <Skeleton className="h-3 w-[92%]" />
+                <Skeleton className="h-3 w-[85%]" />
+              </div>
+            ) : promptText ? (
+              <p className="whitespace-pre-wrap break-words text-[12px] leading-[1.6] text-[var(--text-secondary)] [overflow-wrap:anywhere]">
+                {promptText}
+              </p>
+            ) : caseRunEntry.prompt_preview ? (
+              <p className="whitespace-pre-wrap break-words text-[12px] leading-[1.6] text-[var(--text-secondary)] [overflow-wrap:anywhere]">
+                {caseRunEntry.prompt_preview}
+              </p>
+            ) : (
+              <p className="text-[11px] text-[var(--text-quaternary)]">Prompt unavailable</p>
+            )}
+          </section>
+
+          <section>
+            <SectionLabel>Info</SectionLabel>
+            <div className="space-y-3">
+              <div className="flex flex-wrap items-center gap-1.5">
+                <Badge variant={caseRunEntry.status === "failed" ? "destructive" : "success"}>
+                  {caseRunEntry.status ?? "unknown"}
+                </Badge>
+              </div>
+              <PathCard
+                path={caseRunFolderPath}
+                copyState={copyState}
+                openState={openState}
+                onCopy={() => void handleCopyRecordPath()}
+                onOpen={() => void handleOpenRecordFolder()}
+              />
+              <div className="space-y-0">
+                <div className="prop-row">
+                  <span className="prop-label">Case ID</span>
+                  <span className="prop-value font-mono text-[10px]">{caseRunEntry.case_id}</span>
+                </div>
+                <div className="prop-row">
+                  <span className="prop-label">Suite</span>
+                  <span className="prop-value font-mono text-[10px]">{caseRunEntry.suite ?? "--"}</span>
+                </div>
+                <div className="prop-row">
+                  <span className="prop-label">Run Token</span>
+                  <span className="prop-value font-mono text-[10px]">{caseRunEntry.run_token}</span>
+                </div>
+                <div className="prop-row">
+                  <span className="prop-label">Provider</span>
+                  <span className="prop-value">{caseRunEntry.provider || "--"}</span>
+                </div>
+                <div className="prop-row">
+                  <span className="prop-label">Model</span>
+                  <span className="prop-value font-mono text-[10px]">{caseRunEntry.model_id || "--"}</span>
+                </div>
+                <div className="prop-row">
+                  <span className="prop-label">Thinking</span>
+                  <span className="prop-value">{caseRunEntry.thinking_level || "--"}</span>
+                </div>
+                <div className="prop-row">
+                  <span className="prop-label">Turns</span>
+                  <span className="prop-value font-mono">
+                    {caseRunEntry.turn_count != null ? String(caseRunEntry.turn_count) : "--"}
+                  </span>
+                </div>
+                <div className="prop-row">
+                  <span className="prop-label">Cost</span>
+                  <span className="prop-value font-mono">
+                    {stagingCostStatus === "loading"
+                      ? "Loading..."
+                      : stagingCostStatus === "loaded"
+                        ? formatCost(stagingCostUsd)
+                        : caseRunEntry.total_cost_usd != null
+                          ? `$${caseRunEntry.total_cost_usd.toFixed(4)}`
+                          : "--"}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section>
+            <div className="flex items-center justify-between pb-2">
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-medium uppercase tracking-[0.05em] text-[var(--text-tertiary)]">Kinematic Tree</span>
+                <div className="h-px flex-1 bg-[var(--border-subtle)]" />
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-[9.5px] tabular-nums text-[var(--text-quaternary)]">
+                  {joints.length} joint{joints.length === 1 ? "" : "s"} · {movableJointCount} movable
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onResetAll}
+                  className="h-5 gap-1 px-1.5 text-[10px] text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]"
+                >
+                  <RotateCcw className="size-2.5" />
+                  Reset
+                </Button>
+              </div>
+            </div>
+
+            {joints.length === 0 ? (
+              <div className="flex h-20 items-center justify-center">
+                <p className="text-[11px] text-[var(--text-quaternary)]">
+                  {caseRunEntry.has_checkpoint_urdf ? "No joints detected" : "Awaiting first compile"}
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-1">
+                {rootLinks.map((rootLink) => (
+                  <LinkBranch
+                    key={rootLink}
+                    linkName={rootLink}
+                    jointsByParent={jointsByParent}
+                    jointValues={jointValues}
+                    onJointChange={onJointChange}
+                    seen={new Set([rootLink])}
+                  />
+                ))}
+              </div>
+            )}
+          </section>
+        </div>
+      </ScrollArea>
+    );
+  }
+
   // ── Record inspect view (existing) ──
+  if (isCaseRun && !caseRunEntry) {
+    return (
+      <div className="flex h-32 items-center justify-center">
+        <p className="text-[11px] text-[var(--text-quaternary)]">Loading case run…</p>
+      </div>
+    );
+  }
+
   if (!selectedRecordId) {
     return (
       <div className="flex h-32 items-center justify-center">

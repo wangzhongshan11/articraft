@@ -1,0 +1,23 @@
+{
+  "case_id": "S04",
+  "suite": "01_Simple_Functional_10",
+  "case_dir": "test_cases/01_Simple_Functional_10/cases/S04_planter_with_saucer",
+  "prompt_file": "cases/S04_planter_with_saucer/prompt_en.txt",
+  "reference_image": "test_cases/01_Simple_Functional_10/cases/S04_planter_with_saucer/reference_S04_planter_with_saucer.png",
+  "image_used": "test_cases/01_Simple_Functional_10/cases/S04_planter_with_saucer/reference_S04_planter_with_saucer.png",
+  "run_id": "case_s04_20260708t050103z",
+  "record_id": "bench_s04_20260708t050103z",
+  "status": "success",
+  "message": null,
+  "artifact_dir": "test_cases/01_Simple_Functional_10/cases/S04_planter_with_saucer/runs/20260708T050103Z",
+  "provider": "openai",
+  "model_id": "gpt-5.5",
+  "thinking_level": "med",
+  "turn_count": 26,
+  "tool_call_count": 27,
+  "compile_attempt_count": 7,
+  "total_cost_usd": 0.930683,
+  "compile_target": "visual",
+  "compile_error": null,
+  "compile_warnings": []
+}

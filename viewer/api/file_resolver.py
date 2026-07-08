@@ -333,6 +333,44 @@ class ViewerFileResolver:
 
         return target, trace_media_type(target)
 
+    def resolve_case_run_root(self, case_run_path: str) -> Path:
+        normalized = case_run_path.strip().replace("\\", "/").strip("/")
+        if not normalized:
+            raise HTTPException(status_code=400, detail="Invalid case run path")
+        requested = Path(normalized)
+        if requested.is_absolute() or ".." in requested.parts:
+            raise HTTPException(status_code=400, detail="Invalid case run path")
+
+        artifact_dir = (self.repo.root / requested).resolve()
+        test_cases_root = (self.repo.root / "test_cases").resolve()
+        try:
+            artifact_dir.relative_to(test_cases_root)
+        except ValueError as exc:
+            raise HTTPException(status_code=403, detail="Access denied") from exc
+        if "runs" not in artifact_dir.parts:
+            raise HTTPException(status_code=400, detail="Invalid case run path")
+        if not artifact_dir.is_dir():
+            raise HTTPException(status_code=404, detail=f"Case run not found: {case_run_path}")
+        return artifact_dir
+
+    def resolve_case_run_target(self, case_run_path: str, file_path: str) -> tuple[Path, Path]:
+        artifact_dir = self.resolve_case_run_root(case_run_path)
+        requested_path = self._validated_relative_path(file_path)
+        target = (artifact_dir / requested_path).resolve()
+        self._ensure_within_root(target, artifact_dir)
+
+        if not target.exists() or not target.is_file():
+            raise HTTPException(status_code=404, detail=f"File not found: {file_path}")
+
+        return artifact_dir, target
+
+    def resolve_case_run_trace_target(self, case_run_path: str, file_path: str) -> tuple[Path, str]:
+        requested_path = self._validated_relative_path(file_path)
+        if len(requested_path.parts) != 1:
+            raise HTTPException(status_code=400, detail="Invalid file path")
+        _, target = self.resolve_case_run_target(case_run_path, f"traces/{requested_path.name}")
+        return target, trace_media_type(target)
+
     @staticmethod
     def _validate_record_id(record_id: str) -> None:
         try:

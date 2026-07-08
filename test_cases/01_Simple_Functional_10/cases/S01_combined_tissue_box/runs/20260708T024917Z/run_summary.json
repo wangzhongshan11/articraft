@@ -1,0 +1,23 @@
+{
+  "case_id": "S01",
+  "suite": "01_Simple_Functional_10",
+  "case_dir": "test_cases/01_Simple_Functional_10/cases/S01_combined_tissue_box",
+  "prompt_file": "cases/S01_combined_tissue_box/prompt_en.txt",
+  "reference_image": "test_cases/01_Simple_Functional_10/cases/S01_combined_tissue_box/reference_S01_combined_tissue_box.png",
+  "image_used": "test_cases/01_Simple_Functional_10/cases/S01_combined_tissue_box/reference_S01_combined_tissue_box.png",
+  "run_id": "case_s01_20260708t024917z",
+  "record_id": "bench_s01_20260708t024917z",
+  "status": "success",
+  "message": null,
+  "artifact_dir": "test_cases/01_Simple_Functional_10/cases/S01_combined_tissue_box/runs/20260708T024917Z",
+  "provider": "openai",
+  "model_id": "gpt-5.5",
+  "thinking_level": "med",
+  "turn_count": 13,
+  "tool_call_count": 14,
+  "compile_attempt_count": 2,
+  "total_cost_usd": 0.625831,
+  "compile_target": "visual",
+  "compile_error": null,
+  "compile_warnings": []
+}

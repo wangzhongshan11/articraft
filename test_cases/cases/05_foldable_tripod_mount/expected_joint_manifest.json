@@ -1,0 +1,60 @@
+{
+  "schema_version": "expected-joints.v1",
+  "required_joints": [
+    {
+      "name": "leg_a",
+      "type": "revolute",
+      "parent": "<declare_in_output>",
+      "child": "<declare_in_output>",
+      "axis": "<declare_in_output>",
+      "limit_deg": [
+        0.0,
+        55.0
+      ]
+    },
+    {
+      "name": "leg_b",
+      "type": "revolute",
+      "parent": "<declare_in_output>",
+      "child": "<declare_in_output>",
+      "axis": "<declare_in_output>",
+      "limit_deg": [
+        0.0,
+        55.0
+      ]
+    },
+    {
+      "name": "leg_c",
+      "type": "revolute",
+      "parent": "<declare_in_output>",
+      "child": "<declare_in_output>",
+      "axis": "<declare_in_output>",
+      "limit_deg": [
+        0.0,
+        55.0
+      ]
+    },
+    {
+      "name": "head_tilt",
+      "type": "revolute",
+      "parent": "<declare_in_output>",
+      "child": "<declare_in_output>",
+      "axis": "<declare_in_output>",
+      "limit_deg": [
+        -20.0,
+        75.0
+      ]
+    },
+    {
+      "name": "center_slider",
+      "type": "prismatic",
+      "parent": "<declare_in_output>",
+      "child": "<declare_in_output>",
+      "axis": "<declare_in_output>",
+      "limit_deg": [
+        0.0,
+        45.0
+      ]
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "case_id": "F06",
+  "suite": "02_Furniture_10",
+  "case_dir": "test_cases/02_Furniture_10/cases/F06_two_tier_side_table",
+  "prompt_file": "cases/F06_two_tier_side_table/prompt_en.txt",
+  "reference_image": "test_cases/02_Furniture_10/cases/F06_two_tier_side_table/reference_F06_two_tier_side_table.png",
+  "image_used": "test_cases/02_Furniture_10/cases/F06_two_tier_side_table/reference_F06_two_tier_side_table.png",
+  "run_id": "case_f06_20260708t070532z",
+  "record_id": "bench_f06_20260708t070532z",
+  "status": "success",
+  "message": null,
+  "artifact_dir": "test_cases/02_Furniture_10/cases/F06_two_tier_side_table/runs/20260708T070532Z",
+  "provider": "openai",
+  "model_id": "gpt-5.5",
+  "thinking_level": "med",
+  "turn_count": 23,
+  "tool_call_count": 24,
+  "compile_attempt_count": 7,
+  "total_cost_usd": 0.886068,
+  "compile_target": "visual",
+  "compile_error": null,
+  "compile_warnings": []
+}

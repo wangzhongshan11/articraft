@@ -1,0 +1,101 @@
+schema_version: "articraft-complex-3dprint-case.v1"
+case_id: "05_foldable_tripod_mount"
+title_zh: "折叠三脚架手机/相机支架"
+title_en: "Foldable tripod phone/camera mount"
+benchmark_tier: "complex_articulated_3d_print"
+objective: "Generate a complete tabletop-scale articulated printable model with semantic parts, URDF joints, source, printable mesh exports, and provenance evidence."
+safety_scope: "Desktop-scale non-safety-critical demonstrator only; not for real flight, cutting, heating, adult/child load bearing or medical use."
+input:
+  language: "zh"
+  prompt_file: "prompt_zh.md"
+  optional_reference_policy: "Reference images may be used only if their provenance is recorded."
+kinematics:
+  required_joints:
+    -
+      name: "leg_a"
+      type: "revolute"
+      parent: "<declare_in_output>"
+      child: "<declare_in_output>"
+      axis: "<declare_in_output>"
+      limit_deg:
+        - 0.0
+        - 55.0
+    -
+      name: "leg_b"
+      type: "revolute"
+      parent: "<declare_in_output>"
+      child: "<declare_in_output>"
+      axis: "<declare_in_output>"
+      limit_deg:
+        - 0.0
+        - 55.0
+    -
+      name: "leg_c"
+      type: "revolute"
+      parent: "<declare_in_output>"
+      child: "<declare_in_output>"
+      axis: "<declare_in_output>"
+      limit_deg:
+        - 0.0
+        - 55.0
+    -
+      name: "head_tilt"
+      type: "revolute"
+      parent: "<declare_in_output>"
+      child: "<declare_in_output>"
+      axis: "<declare_in_output>"
+      limit_deg:
+        - -20.0
+        - 75.0
+    -
+      name: "center_slider"
+      type: "prismatic"
+      parent: "<declare_in_output>"
+      child: "<declare_in_output>"
+      axis: "<declare_in_output>"
+      limit_deg:
+        - 0.0
+        - 45.0
+  motion_probe_states:
+    - "rest"
+    - "mid"
+    - "limit"
+  must_be_collision_checked: true
+deliverables:
+  required:
+    - "model.py"
+    - "model.urdf"
+    - "part_manifest.json"
+    - "joint_manifest.json"
+    - "events.jsonl"
+    - "artifact_manifest.json"
+    - "run_metadata.json"
+    - "metrics.json"
+  preferred:
+    - "model.step"
+    - "model.3mf"
+    - "preview.png"
+    - "orthographic_views"
+    - "motion_probe_images"
+  print_mesh:
+    - "STL or 3MF per printable part"
+  min_semantic_parts: 7
+manufacturing:
+  fdm_profile: "../../config/fdm_baseline.json"
+  required_checks:
+    - "tripod_symmetry"
+    - "slider_travel_probe"
+    - "phone_clamp_clearance"
+    - "non_support_print_plan"
+evaluation_focus:
+  - "radial repetition"
+  - "mixed revolute/prismatic joints"
+  - "stability geometry"
+  - "multi-state validation"
+  - "functional sizing"
+scoring:
+  kinematics: 30
+  part_semantics: 15
+  printability: 25
+  artifact_completeness: 15
+  traceability: 15

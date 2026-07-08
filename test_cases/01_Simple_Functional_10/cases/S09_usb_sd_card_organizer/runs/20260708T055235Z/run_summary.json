@@ -1,0 +1,23 @@
+{
+  "case_id": "S09",
+  "suite": "01_Simple_Functional_10",
+  "case_dir": "test_cases/01_Simple_Functional_10/cases/S09_usb_sd_card_organizer",
+  "prompt_file": "cases/S09_usb_sd_card_organizer/prompt_en.txt",
+  "reference_image": "test_cases/01_Simple_Functional_10/cases/S09_usb_sd_card_organizer/reference_S09_usb_sd_card_organizer.png",
+  "image_used": "test_cases/01_Simple_Functional_10/cases/S09_usb_sd_card_organizer/reference_S09_usb_sd_card_organizer.png",
+  "run_id": "case_s09_20260708t055235z",
+  "record_id": "bench_s09_20260708t055235z",
+  "status": "success",
+  "message": null,
+  "artifact_dir": "test_cases/01_Simple_Functional_10/cases/S09_usb_sd_card_organizer/runs/20260708T055235Z",
+  "provider": "openai",
+  "model_id": "gpt-5.5",
+  "thinking_level": "med",
+  "turn_count": 8,
+  "tool_call_count": 9,
+  "compile_attempt_count": 1,
+  "total_cost_usd": 0.355851,
+  "compile_target": "visual",
+  "compile_error": null,
+  "compile_warnings": []
+}

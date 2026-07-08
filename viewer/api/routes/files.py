@@ -202,3 +202,63 @@ async def staging_trace_file(
         raise HTTPException(status_code=400, detail="Invalid file path")
     target, media_type = resolver.resolve_staging_trace_target(run_id, record_id, file_path)
     return FileResponse(target, media_type=media_type)
+
+
+@router.get(
+    "/api/case-runs/{case_run_path:path}/text/{file_path:path}",
+    response_model=RecordTextFileResponse,
+)
+async def case_run_text_file(
+    case_run_path: str,
+    file_path: str,
+    resolver: FileResolverDep,
+    preview_bytes: int = Query(default=131072, ge=4096, le=1048576),
+    full: bool = False,
+) -> RecordTextFileResponse:
+    _, target = resolver.resolve_case_run_target(case_run_path, file_path)
+    if target.suffix.lower() not in TEXT_MEDIA_TYPES:
+        raise HTTPException(status_code=400, detail="Text preview is only supported for text files")
+
+    content, truncated, byte_count = await asyncio.to_thread(
+        read_text_file_payload,
+        target,
+        preview_bytes=preview_bytes,
+        full=full,
+    )
+    return RecordTextFileResponse(
+        record_id=case_run_path,
+        file_path=file_path,
+        content=content,
+        truncated=truncated,
+        byte_count=byte_count,
+        preview_byte_limit=None if full else preview_bytes,
+    )
+
+
+@router.get("/api/case-runs/{case_run_path:path}/files/{file_path:path}")
+async def case_run_file(
+    case_run_path: str,
+    file_path: str,
+    request: Request,
+    resolver: FileResolverDep,
+) -> FileResponse:
+    _, target = resolver.resolve_case_run_target(case_run_path, file_path)
+    return FileResponse(
+        target,
+        media_type=file_media_type(target),
+        headers={
+            "Cache-Control": file_cache_control(immutable=bool(request.query_params.get("rev")))
+        },
+    )
+
+
+@router.get("/api/case-runs/{case_run_path:path}/traces/{file_path:path}")
+async def case_run_trace_file(
+    case_run_path: str,
+    file_path: str,
+    resolver: FileResolverDep,
+) -> FileResponse:
+    if not file_path:
+        raise HTTPException(status_code=400, detail="Invalid file path")
+    target, media_type = resolver.resolve_case_run_trace_target(case_run_path, file_path)
+    return FileResponse(target, media_type=media_type)

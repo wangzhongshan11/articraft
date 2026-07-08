@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type JSX } from "react";
 
 import { useViewer } from "@/lib/viewer-context";
-import { fetchRecordTextFile, fetchStagingTextFile } from "@/lib/api";
+import { fetchCaseRunTextFile, fetchRecordTextFile, fetchStagingTextFile } from "@/lib/api";
+import { findCaseRunEntryInBootstrap } from "@/lib/record-summary";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { codeTheme, SyntaxHighlighter } from "@/components/inspector/syntax-highlighting";
@@ -78,9 +79,20 @@ export function CodePanel(): JSX.Element {
   const stagingRevisionKey = selectedStagingEntry
     ? `${selectedStagingEntry.model_script_updated_at ?? ""}|${selectedStagingEntry.checkpoint_updated_at ?? ""}`
     : "";
+  const selectedCaseRunEntry = useMemo(() => {
+    if (!bootstrap || selection?.kind !== "case_run") {
+      return null;
+    }
+    return findCaseRunEntryInBootstrap(bootstrap, selection.caseRunPath);
+  }, [bootstrap, selection]);
+  const caseRunRevisionKey = selectedCaseRunEntry
+    ? `${selectedCaseRunEntry.model_script_updated_at ?? ""}|${selectedCaseRunEntry.checkpoint_updated_at ?? ""}`
+    : "";
   const selectionKey = selection
     ? selection.kind === "record"
       ? selection.recordId
+      : selection.kind === "case_run"
+      ? `case_run:${selection.caseRunPath}:${caseRunRevisionKey}`
       : `staging:${selection.runId}:${selection.recordId}:${stagingRevisionKey}`
     : null;
 
@@ -109,7 +121,12 @@ export function CodePanel(): JSX.Element {
       }));
 
       try {
-        const payload = selection.kind === "staging"
+        const payload = selection.kind === "case_run"
+          ? await fetchCaseRunTextFile(selection.caseRunPath, tab, {
+              full,
+              previewBytes: PREVIEW_BYTES,
+            })
+          : selection.kind === "staging"
           ? await fetchStagingTextFile(selection.runId, selection.recordId, tab, {
               full,
               previewBytes: PREVIEW_BYTES,

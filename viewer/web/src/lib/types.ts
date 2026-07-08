@@ -125,6 +125,40 @@ export type StagingEntry = {
   persisted_record: RecordSummary | null;
 };
 
+export type CaseRunEntry = {
+  case_run_path: string;
+  case_id: string;
+  suite: string | null;
+  case_dir: string;
+  run_token: string;
+  title: string;
+  prompt_preview: string;
+  status: string | null;
+  message: string | null;
+  provider: string | null;
+  model_id: string | null;
+  thinking_level: string | null;
+  turn_count: number | null;
+  tool_call_count: number | null;
+  compile_attempt_count: number | null;
+  total_cost_usd: number | null;
+  run_id: string | null;
+  record_id: string | null;
+  updated_at: string | null;
+  has_prompt: boolean;
+  has_model_script: boolean;
+  model_script_updated_at: string | null;
+  has_checkpoint_urdf: boolean;
+  checkpoint_updated_at: string | null;
+  has_cost: boolean;
+  has_traces: boolean;
+  has_compile_report: boolean;
+  prompt_file: string | null;
+  reference_image: string | null;
+  compile_target: string | null;
+  compile_error: string | null;
+};
+
 export type RunSummary = {
   run_id: string;
   run_mode: string | null;
@@ -224,6 +258,12 @@ export type OpenStagingFolderResult = {
   path: string;
 };
 
+export type OpenCaseRunFolderResult = {
+  status: string;
+  case_run_path: string;
+  path: string;
+};
+
 export type RunDetail = {
   run: RunSummary;
   run_metadata: Record<string, unknown>;
@@ -319,16 +359,18 @@ export type ViewerBootstrap = {
   workbench_entries: WorkbenchEntry[];
   dataset_entries: DatasetEntry[];
   staging_entries: StagingEntry[];
+  case_run_entries: CaseRunEntry[];
   runs: RunSummary[];
   supercategories: SupercategoryOption[];
 };
 
 export type ViewerSelection =
   | { kind: "record"; recordId: string }
-  | { kind: "staging"; runId: string; recordId: string };
+  | { kind: "staging"; runId: string; recordId: string }
+  | { kind: "case_run"; caseRunPath: string };
 
 export type SourceFilter = "workbench" | "dataset";
-export type BrowserTab = SourceFilter | "staging";
+export type BrowserTab = SourceFilter | "staging" | "case_runs";
 export type AgentHarness = "articraft" | "codex" | "claude-code";
 export type TimeFilterPoint = "1y" | "180d" | "90d" | "60d" | "30d" | "14d" | "7d" | "3d" | "24h" | "12h" | "6h" | "1h";
 export type TimeFilter = {

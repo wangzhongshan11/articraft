@@ -1,0 +1,13 @@
+{
+  "case_id": "08_foldable_utility_cart",
+  "fdm_profile": "../../config/fdm_baseline.json",
+  "checks": [
+    "four_wheel_alignment",
+    "folded_open_probe",
+    "wheel_axle_clearance",
+    "non_loadbearing_label"
+  ],
+  "required_mesh_outputs": "STL or 3MF per printable part",
+  "must_declare_orientation": true,
+  "must_declare_support_strategy": true
+}

@@ -1,0 +1,23 @@
+{
+  "case_id": "F07",
+  "suite": "02_Furniture_10",
+  "case_dir": "test_cases/02_Furniture_10/cases/F07_single_drawer_nightstand",
+  "prompt_file": "cases/F07_single_drawer_nightstand/prompt_en.txt",
+  "reference_image": "test_cases/02_Furniture_10/cases/F07_single_drawer_nightstand/reference_F07_single_drawer_nightstand.png",
+  "image_used": "test_cases/02_Furniture_10/cases/F07_single_drawer_nightstand/reference_F07_single_drawer_nightstand.png",
+  "run_id": "case_f07_20260708t071811z",
+  "record_id": "bench_f07_20260708t071811z",
+  "status": "success",
+  "message": null,
+  "artifact_dir": "test_cases/02_Furniture_10/cases/F07_single_drawer_nightstand/runs/20260708T071811Z",
+  "provider": "openai",
+  "model_id": "gpt-5.5",
+  "thinking_level": "med",
+  "turn_count": 18,
+  "tool_call_count": 20,
+  "compile_attempt_count": 3,
+  "total_cost_usd": 1.146503,
+  "compile_target": "visual",
+  "compile_error": null,
+  "compile_warnings": []
+}

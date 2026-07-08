@@ -9,6 +9,7 @@ import {
 import { RecordSearch } from "@/components/browser/RecordSearch";
 import { RecordList } from "@/components/browser/RecordList";
 import { StagingList } from "@/components/browser/StagingList";
+import { CaseRunsList } from "@/components/browser/CaseRunsList";
 
 type BrowserCounts = {
   visible: number;
@@ -65,6 +66,17 @@ export function RecordBrowser(): JSX.Element {
           >
             Staging
           </button>
+          <button
+            type="button"
+            onClick={() => dispatch({ type: "SET_BROWSER_TAB", payload: "case_runs" })}
+            className={`relative px-3 py-3 text-[11px] font-medium tracking-[0.01em] transition-colors duration-150 ${
+              browserTab === "case_runs"
+                ? "text-[#2563eb] after:absolute after:bottom-0 after:left-3 after:right-3 after:h-[1.5px] after:rounded-full after:bg-[#2563eb]"
+                : "text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]"
+            }`}
+          >
+            Case Runs
+          </button>
         </div>
       </div>
 
@@ -83,6 +95,16 @@ export function RecordBrowser(): JSX.Element {
             </p>
           </div>
           <StagingList onCountsChange={handleCountsChange} />
+        </>
+      ) : browserTab === "case_runs" ? (
+        <>
+          <div className="space-y-2 border-b border-[var(--border-default)] px-3 py-3">
+            <RecordSearch placeholder="Search case runs…" />
+            <p className="text-[10px] text-[var(--text-tertiary)]">
+              {browserCounts.visible} / {browserCounts.total}
+            </p>
+          </div>
+          <CaseRunsList onCountsChange={handleCountsChange} />
         </>
       ) : (
         <>

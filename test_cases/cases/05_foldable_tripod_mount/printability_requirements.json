@@ -1,0 +1,13 @@
+{
+  "case_id": "05_foldable_tripod_mount",
+  "fdm_profile": "../../config/fdm_baseline.json",
+  "checks": [
+    "tripod_symmetry",
+    "slider_travel_probe",
+    "phone_clamp_clearance",
+    "non_support_print_plan"
+  ],
+  "required_mesh_outputs": "STL or 3MF per printable part",
+  "must_declare_orientation": true,
+  "must_declare_support_strategy": true
+}

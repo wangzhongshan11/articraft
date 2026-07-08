@@ -1,0 +1,23 @@
+{
+  "case_id": "F08",
+  "suite": "02_Furniture_10",
+  "case_dir": "test_cases/02_Furniture_10/cases/F08_double_door_low_cabinet",
+  "prompt_file": "cases/F08_double_door_low_cabinet/prompt_en.txt",
+  "reference_image": "test_cases/02_Furniture_10/cases/F08_double_door_low_cabinet/reference_F08_double_door_low_cabinet.png",
+  "image_used": "test_cases/02_Furniture_10/cases/F08_double_door_low_cabinet/reference_F08_double_door_low_cabinet.png",
+  "run_id": "case_f08_20260708t073216z",
+  "record_id": "bench_f08_20260708t073216z",
+  "status": "success",
+  "message": null,
+  "artifact_dir": "test_cases/02_Furniture_10/cases/F08_double_door_low_cabinet/runs/20260708T073216Z",
+  "provider": "openai",
+  "model_id": "gpt-5.5",
+  "thinking_level": "med",
+  "turn_count": 10,
+  "tool_call_count": 11,
+  "compile_attempt_count": 2,
+  "total_cost_usd": 0.636154,
+  "compile_target": "visual",
+  "compile_error": null,
+  "compile_warnings": []
+}

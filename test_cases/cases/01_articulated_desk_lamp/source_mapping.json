@@ -1,0 +1,12 @@
+{
+  "case_id": "01_articulated_desk_lamp",
+  "source_type": "Articraft-informed benchmark category",
+  "public_basis": "desk lamps（论文列举的典型铰接日常物件；README 也用台灯作为生成示例）",
+  "articraft_record_id": null,
+  "record_selection_status": "TO_BE_FILLED_AFTER_LOCAL_VIEWER_OR_INDEX_SEARCH",
+  "search_terms": [
+    "dual-arm adjustable desk lamp",
+    "双臂可调台灯"
+  ],
+  "notes": "Select an Articraft-10K reference only after inspecting actual semantic parts, joint graph and trace. Do not equate a similar silhouette with a suitable kinematic reference."
+}

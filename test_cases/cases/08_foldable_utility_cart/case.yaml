@@ -1,0 +1,110 @@
+schema_version: "articraft-complex-3dprint-case.v1"
+case_id: "08_foldable_utility_cart"
+title_zh: "折叠式工具推车/婴儿车骨架模型（非承载）"
+title_en: "Foldable utility-cart / stroller-frame model (non-load-bearing)"
+benchmark_tier: "complex_articulated_3d_print"
+objective: "Generate a complete tabletop-scale articulated printable model with semantic parts, URDF joints, source, printable mesh exports, and provenance evidence."
+safety_scope: "Desktop-scale non-safety-critical demonstrator only; not for real flight, cutting, heating, adult/child load bearing or medical use."
+input:
+  language: "zh"
+  prompt_file: "prompt_zh.md"
+  optional_reference_policy: "Reference images may be used only if their provenance is recorded."
+kinematics:
+  required_joints:
+    -
+      name: "rear_wheel_l"
+      type: "continuous"
+      parent: "<declare_in_output>"
+      child: "<declare_in_output>"
+      axis: "<declare_in_output>"
+      limit_deg:
+        - -360.0
+        - 360.0
+    -
+      name: "rear_wheel_r"
+      type: "continuous"
+      parent: "<declare_in_output>"
+      child: "<declare_in_output>"
+      axis: "<declare_in_output>"
+      limit_deg:
+        - -360.0
+        - 360.0
+    -
+      name: "front_wheel_l"
+      type: "continuous"
+      parent: "<declare_in_output>"
+      child: "<declare_in_output>"
+      axis: "<declare_in_output>"
+      limit_deg:
+        - -360.0
+        - 360.0
+    -
+      name: "front_wheel_r"
+      type: "continuous"
+      parent: "<declare_in_output>"
+      child: "<declare_in_output>"
+      axis: "<declare_in_output>"
+      limit_deg:
+        - -360.0
+        - 360.0
+    -
+      name: "fold_link_left"
+      type: "revolute"
+      parent: "<declare_in_output>"
+      child: "<declare_in_output>"
+      axis: "<declare_in_output>"
+      limit_deg:
+        - 0.0
+        - 75.0
+    -
+      name: "fold_link_right"
+      type: "revolute"
+      parent: "<declare_in_output>"
+      child: "<declare_in_output>"
+      axis: "<declare_in_output>"
+      limit_deg:
+        - 0.0
+        - 75.0
+  motion_probe_states:
+    - "rest"
+    - "mid"
+    - "limit"
+  must_be_collision_checked: true
+deliverables:
+  required:
+    - "model.py"
+    - "model.urdf"
+    - "part_manifest.json"
+    - "joint_manifest.json"
+    - "events.jsonl"
+    - "artifact_manifest.json"
+    - "run_metadata.json"
+    - "metrics.json"
+  preferred:
+    - "model.step"
+    - "model.3mf"
+    - "preview.png"
+    - "orthographic_views"
+    - "motion_probe_images"
+  print_mesh:
+    - "STL or 3MF per printable part"
+  min_semantic_parts: 8
+manufacturing:
+  fdm_profile: "../../config/fdm_baseline.json"
+  required_checks:
+    - "four_wheel_alignment"
+    - "folded_open_probe"
+    - "wheel_axle_clearance"
+    - "non_loadbearing_label"
+evaluation_focus:
+  - "multi-body hierarchy"
+  - "wheel/hinge coexistence"
+  - "folding mechanism"
+  - "repeated parts"
+  - "assembly trace"
+scoring:
+  kinematics: 30
+  part_semantics: 15
+  printability: 25
+  artifact_completeness: 15
+  traceability: 15

@@ -1,0 +1,12 @@
+{
+  "case_id": "03_folding_quadcopter_frame",
+  "source_type": "Articraft-informed benchmark category",
+  "public_basis": "drones（论文的数据集类别示例）",
+  "articraft_record_id": null,
+  "record_selection_status": "TO_BE_FILLED_AFTER_LOCAL_VIEWER_OR_INDEX_SEARCH",
+  "search_terms": [
+    "folding quadcopter frame (electronics-free)",
+    "折叠式四旋翼无人机机架（无电子件）"
+  ],
+  "notes": "Select an Articraft-10K reference only after inspecting actual semantic parts, joint graph and trace. Do not equate a similar silhouette with a suitable kinematic reference."
+}

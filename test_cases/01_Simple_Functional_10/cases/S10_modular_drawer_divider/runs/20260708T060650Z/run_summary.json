@@ -1,0 +1,23 @@
+{
+  "case_id": "S10",
+  "suite": "01_Simple_Functional_10",
+  "case_dir": "test_cases/01_Simple_Functional_10/cases/S10_modular_drawer_divider",
+  "prompt_file": "cases/S10_modular_drawer_divider/prompt_en.txt",
+  "reference_image": "test_cases/01_Simple_Functional_10/cases/S10_modular_drawer_divider/reference_S10_modular_drawer_divider.png",
+  "image_used": "test_cases/01_Simple_Functional_10/cases/S10_modular_drawer_divider/reference_S10_modular_drawer_divider.png",
+  "run_id": "case_s10_20260708t060650z",
+  "record_id": "bench_s10_20260708t060650z",
+  "status": "success",
+  "message": null,
+  "artifact_dir": "test_cases/01_Simple_Functional_10/cases/S10_modular_drawer_divider/runs/20260708T060650Z",
+  "provider": "openai",
+  "model_id": "gpt-5.5",
+  "thinking_level": "med",
+  "turn_count": 13,
+  "tool_call_count": 14,
+  "compile_attempt_count": 3,
+  "total_cost_usd": 0.913174,
+  "compile_target": "visual",
+  "compile_error": null,
+  "compile_warnings": []
+}

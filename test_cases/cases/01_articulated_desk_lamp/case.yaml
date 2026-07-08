@@ -1,0 +1,83 @@
+schema_version: "articraft-complex-3dprint-case.v1"
+case_id: "01_articulated_desk_lamp"
+title_zh: "双臂可调台灯"
+title_en: "Dual-arm adjustable desk lamp"
+benchmark_tier: "complex_articulated_3d_print"
+objective: "Generate a complete tabletop-scale articulated printable model with semantic parts, URDF joints, source, printable mesh exports, and provenance evidence."
+safety_scope: "Desktop-scale non-safety-critical demonstrator only; not for real flight, cutting, heating, adult/child load bearing or medical use."
+input:
+  language: "zh"
+  prompt_file: "prompt_zh.md"
+  optional_reference_policy: "Reference images may be used only if their provenance is recorded."
+kinematics:
+  required_joints:
+    -
+      name: "lower_arm_yaw"
+      type: "revolute"
+      parent: "<declare_in_output>"
+      child: "<declare_in_output>"
+      axis: "<declare_in_output>"
+      limit_deg:
+        - -70.0
+        - 70.0
+    -
+      name: "upper_arm_pitch"
+      type: "revolute"
+      parent: "<declare_in_output>"
+      child: "<declare_in_output>"
+      axis: "<declare_in_output>"
+      limit_deg:
+        - -20.0
+        - 115.0
+    -
+      name: "lamp_head_pitch"
+      type: "revolute"
+      parent: "<declare_in_output>"
+      child: "<declare_in_output>"
+      axis: "<declare_in_output>"
+      limit_deg:
+        - -45.0
+        - 80.0
+  motion_probe_states:
+    - "rest"
+    - "mid"
+    - "limit"
+  must_be_collision_checked: true
+deliverables:
+  required:
+    - "model.py"
+    - "model.urdf"
+    - "part_manifest.json"
+    - "joint_manifest.json"
+    - "events.jsonl"
+    - "artifact_manifest.json"
+    - "run_metadata.json"
+    - "metrics.json"
+  preferred:
+    - "model.step"
+    - "model.3mf"
+    - "preview.png"
+    - "orthographic_views"
+    - "motion_probe_images"
+  print_mesh:
+    - "STL or 3MF per printable part"
+  min_semantic_parts: 5
+manufacturing:
+  fdm_profile: "../../config/fdm_baseline.json"
+  required_checks:
+    - "all_parts_fit_220mm_bed"
+    - "pivot_clearance_ge_0.30mm"
+    - "no_support_or_split_required"
+    - "joint_axis_motion_probe"
+evaluation_focus:
+  - "part hierarchy"
+  - "serial joint axes"
+  - "range limits"
+  - "collision-free poses"
+  - "printable pivots"
+scoring:
+  kinematics: 30
+  part_semantics: 15
+  printability: 25
+  artifact_completeness: 15
+  traceability: 15

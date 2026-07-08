@@ -1,0 +1,13 @@
+{
+  "case_id": "06_foldable_chair_model",
+  "fdm_profile": "../../config/fdm_baseline.json",
+  "checks": [
+    "three_pose_collision_probe",
+    "non_loadbearing_label",
+    "rod_thickness_ge_4mm",
+    "pivot_alignment"
+  ],
+  "required_mesh_outputs": "STL or 3MF per printable part",
+  "must_declare_orientation": true,
+  "must_declare_support_strategy": true
+}

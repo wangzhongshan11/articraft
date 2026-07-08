@@ -1,0 +1,12 @@
+{
+  "case_id": "05_foldable_tripod_mount",
+  "source_type": "Articraft-informed benchmark category",
+  "public_basis": "tripod-mounted devices（论文的数据集类别示例）",
+  "articraft_record_id": null,
+  "record_selection_status": "TO_BE_FILLED_AFTER_LOCAL_VIEWER_OR_INDEX_SEARCH",
+  "search_terms": [
+    "foldable tripod phone/camera mount",
+    "折叠三脚架手机/相机支架"
+  ],
+  "notes": "Select an Articraft-10K reference only after inspecting actual semantic parts, joint graph and trace. Do not equate a similar silhouette with a suitable kinematic reference."
+}

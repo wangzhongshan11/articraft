@@ -2,6 +2,8 @@ import { useEffect, useState, type JSX } from "react";
 
 import { useViewer, useViewerDispatch } from "@/lib/viewer-context";
 import {
+  fetchCaseRunFile,
+  fetchCaseRunTraceFile,
   fetchRecordFile,
   fetchRecordHistory,
   fetchRecordTraceFile,
@@ -9,7 +11,7 @@ import {
   fetchStagingTraceFile,
 } from "@/lib/api";
 import type { RecordHistory, RecordHistoryRevision, RecordSummary } from "@/lib/types";
-import { findStagingEntryInBootstrap } from "@/lib/record-summary";
+import { findCaseRunEntryInBootstrap, findStagingEntryInBootstrap } from "@/lib/record-summary";
 import { TracePanel } from "@/components/inspector/TracePanel";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -187,13 +189,25 @@ export function MetadataPanel(): JSX.Element {
   const [history, setHistory] = useState<RecordHistory | null>(null);
   const [loadingExtras, setLoadingExtras] = useState(false);
 
+  const isCaseRun = selection?.kind === "case_run";
+  const caseRunEntry =
+    isCaseRun && selection?.kind === "case_run"
+      ? findCaseRunEntryInBootstrap(bootstrap, selection.caseRunPath)
+      : null;
   const isStaging = selection?.kind === "staging";
   const stagingEntry = isStaging
     ? findStagingEntryInBootstrap(bootstrap, selection.runId, selection.recordId)
     : null;
   const record = selection?.kind === "record" ? selectedRecordSummary : null;
   const compileStatus =
-    typeof compileReport?.status === "string" ? compileReport.status : record?.has_compile_report ? "available" : null;
+    typeof compileReport?.status === "string"
+      ? compileReport.status
+      : caseRunEntry?.has_compile_report
+      ? "available"
+      : record?.has_compile_report
+      ? "available"
+      : null;
+  const caseRunSelectionKey = selection?.kind === "case_run" ? selection.caseRunPath : null;
   const stagingSelectionKey =
     selection?.kind === "staging" ? `${selection.runId}:${selection.recordId}` : null;
   const recordSelectionKey = selection?.kind === "record" ? selection.recordId : null;
@@ -202,12 +216,74 @@ export function MetadataPanel(): JSX.Element {
   const recordHasCost = record?.has_cost ?? false;
   const recordHasTraces = record?.has_traces ?? false;
   const isExternalRecord = record?.creator_mode === "external_agent";
+  const caseRunHasCost = caseRunEntry?.has_cost ?? false;
+  const caseRunHasTraces = caseRunEntry?.has_traces ?? false;
+  const caseRunHasCompileReport = caseRunEntry?.has_compile_report ?? false;
+  const caseRunPath = caseRunEntry?.case_run_path ?? null;
   const stagingHasCost = stagingEntry?.has_cost ?? false;
   const stagingHasTraces = stagingEntry?.has_traces ?? false;
   const stagingRecordId = stagingEntry?.record_id ?? null;
   const stagingRunId = stagingEntry?.run_id ?? null;
 
   useEffect(() => {
+    if (isCaseRun && caseRunPath) {
+      let cancelled = false;
+      setLoadingExtras(true);
+      setCompileReport(null);
+
+      const promises: Promise<void>[] = [];
+
+      if (caseRunHasCost) {
+        promises.push(
+          fetchCaseRunFile(caseRunPath, "cost.json")
+            .then((text) => {
+              if (!cancelled) setCost(JSON.parse(text) as Record<string, unknown>);
+            })
+            .catch(() => {
+              if (!cancelled) setCost(null);
+            }),
+        );
+      } else {
+        setCost(null);
+      }
+
+      if (caseRunHasCompileReport) {
+        promises.push(
+          fetchCaseRunFile(caseRunPath, "compile_report.json")
+            .then((text) => {
+              if (!cancelled) setCompileReport(JSON.parse(text) as Record<string, unknown>);
+            })
+            .catch(() => {
+              if (!cancelled) setCompileReport(null);
+            }),
+        );
+      } else {
+        setCompileReport(null);
+      }
+
+      if (caseRunHasTraces) {
+        promises.push(
+          fetchCaseRunTraceFile(caseRunPath, "trajectory.jsonl")
+            .then((text) => {
+              if (!cancelled) setTraceText(text);
+            })
+            .catch(() => {
+              if (!cancelled) setTraceText(null);
+            }),
+        );
+      } else {
+        setTraceText(null);
+      }
+
+      Promise.all(promises).finally(() => {
+        if (!cancelled) setLoadingExtras(false);
+      });
+
+      return () => {
+        cancelled = true;
+      };
+    }
+
     // Staging metadata loading
     if (isStaging && stagingRunId && stagingRecordId) {
       let cancelled = false;
@@ -316,7 +392,13 @@ export function MetadataPanel(): JSX.Element {
       cancelled = true;
     };
   }, [
+    caseRunHasCompileReport,
+    caseRunHasCost,
+    caseRunHasTraces,
+    caseRunPath,
+    caseRunSelectionKey,
     hasSelectedRecord,
+    isCaseRun,
     isStaging,
     recordHasCompileReport,
     recordHasCost,
@@ -354,6 +436,100 @@ export function MetadataPanel(): JSX.Element {
       <div className="flex h-32 items-center justify-center">
         <p className="text-[11px] text-[var(--text-quaternary)]">Select a record</p>
       </div>
+    );
+  }
+
+  // ── Case run metadata view ──
+  if (isCaseRun && !caseRunEntry) {
+    return (
+      <div className="flex h-32 items-center justify-center">
+        <p className="text-[11px] text-[var(--text-quaternary)]">Loading case run…</p>
+      </div>
+    );
+  }
+
+  if (isCaseRun && caseRunEntry) {
+    return (
+      <ScrollArea className="h-full">
+        <div className="space-y-5 pb-3">
+          <section>
+            <SectionLabel>Identity</SectionLabel>
+            <div className="space-y-0">
+              <div className="prop-row-stacked">
+                <span className="prop-label">Case ID</span>
+                <span className="prop-value font-mono text-[10px]">{caseRunEntry.case_id}</span>
+              </div>
+              <div className="prop-row-stacked">
+                <span className="prop-label">Suite</span>
+                <span className="prop-value font-mono text-[10px]">{caseRunEntry.suite ?? "--"}</span>
+              </div>
+              <div className="prop-row-stacked">
+                <span className="prop-label">Run Token</span>
+                <span className="prop-value font-mono text-[10px]">{caseRunEntry.run_token}</span>
+              </div>
+              <div className="prop-row-stacked">
+                <span className="prop-label">Artifact Dir</span>
+                <span className="prop-value font-mono text-[10px]">{caseRunEntry.case_run_path}</span>
+              </div>
+              <div className="prop-row">
+                <span className="prop-label">Updated</span>
+                <span className="prop-value">{formatDate(caseRunEntry.updated_at)}</span>
+              </div>
+            </div>
+          </section>
+
+          <section>
+            <SectionLabel>Status</SectionLabel>
+            <div className="flex flex-wrap items-center gap-1.5">
+              <Badge variant={statusVariant(caseRunEntry.status)}>
+                {caseRunEntry.status ?? "unknown"}
+              </Badge>
+              {caseRunEntry.compile_target ? (
+                <Badge variant="secondary">Compile: {caseRunEntry.compile_target}</Badge>
+              ) : null}
+            </div>
+            {caseRunEntry.message ? (
+              <p className="mt-2 text-[11px] text-[var(--text-secondary)]">{caseRunEntry.message}</p>
+            ) : null}
+            {caseRunEntry.compile_error ? (
+              <p className="mt-2 text-[11px] text-[var(--destructive)]">{caseRunEntry.compile_error}</p>
+            ) : null}
+          </section>
+
+          <section>
+            <SectionLabel>Metrics</SectionLabel>
+            <div className="space-y-0">
+              <div className="prop-row">
+                <span className="prop-label">Model</span>
+                <span className="prop-value font-mono text-[10px]">
+                  {[caseRunEntry.provider, caseRunEntry.model_id].filter(Boolean).join(" / ") || "--"}
+                </span>
+              </div>
+              <div className="prop-row">
+                <span className="prop-label">Turns</span>
+                <span className="prop-value font-mono">
+                  {caseRunEntry.turn_count != null ? String(caseRunEntry.turn_count) : "--"}
+                </span>
+              </div>
+              <div className="prop-row">
+                <span className="prop-label">Cost</span>
+                <span className="prop-value font-mono">
+                  {caseRunEntry.total_cost_usd != null ? `$${caseRunEntry.total_cost_usd.toFixed(4)}` : "--"}
+                </span>
+              </div>
+            </div>
+          </section>
+
+          {loadingExtras ? (
+            <div className="space-y-1.5">
+              <Skeleton className="h-3 w-24" />
+              <Skeleton className="h-14 w-full" />
+            </div>
+          ) : null}
+
+          {!loadingExtras ? <TracePanel cost={cost} traceText={traceText} /> : null}
+        </div>
+      </ScrollArea>
     );
   }
 

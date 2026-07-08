@@ -7,7 +7,7 @@ import { useRoute } from "@/lib/useRoute";
 import { navigateTo } from "@/lib/router";
 import { viewerQueryKeys } from "@/lib/viewer-queries";
 import { useViewer } from "@/lib/viewer-context";
-import { findStagingEntryInBootstrap } from "@/lib/record-summary";
+import { findCaseRunEntryInBootstrap, findStagingEntryInBootstrap } from "@/lib/record-summary";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
@@ -32,12 +32,18 @@ function ViewerHeaderContents(): JSX.Element {
   const queryClient = useQueryClient();
   const activeFetchCount = useIsFetching({ queryKey: viewerQueryKeys.root() });
 
+  const isCaseRunSelection = state.selection?.kind === "case_run";
+  const caseRunEntry = isCaseRunSelection && state.selection?.kind === "case_run"
+    ? findCaseRunEntryInBootstrap(state.bootstrap, state.selection.caseRunPath)
+    : null;
   const isStagingSelection = state.selection?.kind === "staging";
   const stagingEntry = isStagingSelection && state.selection?.kind === "staging"
     ? findStagingEntryInBootstrap(state.bootstrap, state.selection.runId, state.selection.recordId)
     : null;
 
-  const titleSource = isStagingSelection
+  const titleSource = isCaseRunSelection
+    ? caseRunEntry?.title ?? null
+    : isStagingSelection
     ? stagingEntry?.title ?? null
     : state.selectedRecordSummary?.title ?? null;
   const selectedRecordTitleFull = titleSource;
@@ -58,6 +64,7 @@ function ViewerHeaderContents(): JSX.Element {
       <div className="mx-1 flex min-w-0 flex-1 items-center justify-center gap-2">
         {selectedRecordTitle ? (
           <>
+            {isCaseRunSelection ? <Badge variant="secondary">CASE RUN</Badge> : null}
             {isStagingSelection ? <Badge variant="success">STAGING</Badge> : null}
             <p
               className="max-w-full truncate text-[12px] text-[var(--text-secondary)]"

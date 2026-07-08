@@ -4,6 +4,8 @@ import type { PanelImperativeHandle, PanelSize } from "react-resizable-panels";
 import * as THREE from "three";
 
 import { useViewer } from "@/lib/viewer-context";
+import { encodeCaseRunPath } from "@/lib/api";
+import { findCaseRunEntryInBootstrap } from "@/lib/record-summary";
 import { updateUrlSearchParams } from "@/lib/url";
 import {
   ResizablePanelGroup,
@@ -460,6 +462,8 @@ export default function ViewerShell(): JSX.Element {
   const baseFileUrl = selection
     ? selection.kind === "record"
       ? `/api/records/${selection.recordId}/files`
+      : selection.kind === "case_run"
+      ? `/api/case-runs/${encodeCaseRunPath(selection.caseRunPath)}/files`
       : `/api/staging/${selection.runId}/${selection.recordId}/files`
     : null;
   const selectedStagingEntry = useMemo(() => {
@@ -472,17 +476,27 @@ export default function ViewerShell(): JSX.Element {
       ) ?? null
     );
   }, [bootstrap, selection]);
+  const selectedCaseRunEntry = useMemo(() => {
+    if (!bootstrap || selection?.kind !== "case_run") {
+      return null;
+    }
+    return findCaseRunEntryInBootstrap(bootstrap, selection.caseRunPath);
+  }, [bootstrap, selection]);
   const selectedRecord = useMemo(() => {
     return selection?.kind === "record" ? selectedRecordSummary : null;
   }, [selectedRecordSummary, selection]);
   const assetRevisionKey = selection
-    ? selection.kind === "staging"
+    ? selection.kind === "case_run"
+      ? selectedCaseRunEntry?.checkpoint_updated_at ?? selectedCaseRunEntry?.updated_at ?? null
+      : selection.kind === "staging"
       ? selectedStagingEntry?.checkpoint_updated_at ?? selectedStagingEntry?.updated_at ?? null
       : selectedRecord?.viewer_asset_updated_at ?? null
     : null;
   const selectionKey = selection
     ? selection.kind === "record"
       ? selection.recordId
+      : selection.kind === "case_run"
+      ? `case_run:${selection.caseRunPath}`
       : `staging:${selection.runId}:${selection.recordId}`
     : null;
   const missingArtifactsState = useMemo(() => {

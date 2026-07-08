@@ -1,0 +1,23 @@
+{
+  "case_id": "S07",
+  "suite": "01_Simple_Functional_10",
+  "case_dir": "test_cases/01_Simple_Functional_10/cases/S07_desk_clamp_headphone_hook",
+  "prompt_file": "cases/S07_desk_clamp_headphone_hook/prompt_en.txt",
+  "reference_image": "test_cases/01_Simple_Functional_10/cases/S07_desk_clamp_headphone_hook/reference_S07_desk_clamp_headphone_hook.png",
+  "image_used": "test_cases/01_Simple_Functional_10/cases/S07_desk_clamp_headphone_hook/reference_S07_desk_clamp_headphone_hook.png",
+  "run_id": "case_s07_20260708t053707z",
+  "record_id": "bench_s07_20260708t053707z",
+  "status": "success",
+  "message": null,
+  "artifact_dir": "test_cases/01_Simple_Functional_10/cases/S07_desk_clamp_headphone_hook/runs/20260708T053707Z",
+  "provider": "openai",
+  "model_id": "gpt-5.5",
+  "thinking_level": "med",
+  "turn_count": 16,
+  "tool_call_count": 17,
+  "compile_attempt_count": 5,
+  "total_cost_usd": 0.980058,
+  "compile_target": "visual",
+  "compile_error": null,
+  "compile_warnings": []
+}

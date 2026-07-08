@@ -37,6 +37,7 @@ import type {
 const URL_QUERY_PARAMS = {
   record: "record",
   staging: "staging",
+  caseRun: "case_run",
   browser: "browser",
   tab: "tab",
   search: "q",
@@ -56,7 +57,7 @@ const URL_QUERY_PARAMS = {
 } as const;
 
 const INSPECTOR_TABS = ["inspect", "render", "code", "metadata"] as const satisfies readonly InspectorTab[];
-const BROWSER_TABS = ["workbench", "dataset", "staging"] as const satisfies readonly BrowserTab[];
+const BROWSER_TABS = ["workbench", "dataset", "staging", "case_runs"] as const satisfies readonly BrowserTab[];
 const SOURCE_FILTERS = ["workbench", "dataset"] as const satisfies readonly SourceFilter[];
 const TIME_FILTER_POINTS = new Set<string>(["1y", "180d", "90d", "60d", "30d", "14d", "7d", "3d", "24h", "12h", "6h", "1h"]);
 const RATING_FILTERS = ["1", "2", "3", "4", "5", "unrated"] as const satisfies readonly RatingFilterValue[];
@@ -165,6 +166,20 @@ function parseStagingParam(value: string | null): ViewerSelection | null {
   return { kind: "staging", runId, recordId };
 }
 
+function parseCaseRunParam(value: string | null): ViewerSelection | null {
+  const normalizedValue = value?.trim() ?? "";
+  if (!normalizedValue) return null;
+  try {
+    const decoded = decodeURIComponent(normalizedValue);
+    if (!decoded.includes("test_cases/") || !decoded.includes("/runs/")) {
+      return null;
+    }
+    return { kind: "case_run", caseRunPath: decoded.replace(/\\/g, "/") };
+  } catch {
+    return null;
+  }
+}
+
 function normalizeOptionalQueryParam(value: string | null): string | null {
   const normalizedValue = value?.trim() ?? "";
   return normalizedValue ? normalizedValue : null;
@@ -218,9 +233,13 @@ function readViewerUrlState(): ViewerUrlState {
     const params = new URLSearchParams(window.location.search);
     const rawRecordId = normalizeOptionalQueryParam(params.get(URL_QUERY_PARAMS.record));
     const rawStaging = normalizeOptionalQueryParam(params.get(URL_QUERY_PARAMS.staging));
+    const rawCaseRun = normalizeOptionalQueryParam(params.get(URL_QUERY_PARAMS.caseRun));
 
     let selection: ViewerSelection | null = null;
-    if (rawStaging) {
+    if (rawCaseRun) {
+      selection = parseCaseRunParam(rawCaseRun);
+    }
+    if (!selection && rawStaging) {
       selection = parseStagingParam(rawStaging);
     }
     if (!selection && rawRecordId) {
@@ -242,10 +261,16 @@ function readViewerUrlState(): ViewerUrlState {
     const parsedBrowserTab = parseEnumParam(
       params.get(URL_QUERY_PARAMS.browser),
       BROWSER_TABS,
-      selection?.kind === "staging" ? "staging" : parsedSourceFilter,
+      selection?.kind === "case_run"
+        ? "case_runs"
+        : selection?.kind === "staging"
+        ? "staging"
+        : parsedSourceFilter,
     );
     const sourceFilter =
-      parsedBrowserTab === "staging" ? parsedSourceFilter : parsedBrowserTab;
+      parsedBrowserTab === "staging" || parsedBrowserTab === "case_runs"
+        ? parsedSourceFilter
+        : parsedBrowserTab;
     const timeFilter: TimeFilter = {
       oldest: parseTimeFilterPoint(params.get(URL_QUERY_PARAMS.timeFrom)),
       newest: parseTimeFilterPoint(params.get(URL_QUERY_PARAMS.timeTo)),
@@ -313,16 +338,26 @@ function syncViewerStateToUrl(state: ViewerUrlState): void {
 
   const url = new URL(window.location.href);
 
-  // Selection: record or staging param
+  // Selection: record, staging, or case run param
   if (state.selection?.kind === "record") {
     url.searchParams.set(URL_QUERY_PARAMS.record, state.selection.recordId);
     url.searchParams.delete(URL_QUERY_PARAMS.staging);
+    url.searchParams.delete(URL_QUERY_PARAMS.caseRun);
   } else if (state.selection?.kind === "staging") {
     url.searchParams.delete(URL_QUERY_PARAMS.record);
+    url.searchParams.delete(URL_QUERY_PARAMS.caseRun);
     url.searchParams.set(URL_QUERY_PARAMS.staging, `${state.selection.runId}:${state.selection.recordId}`);
+  } else if (state.selection?.kind === "case_run") {
+    url.searchParams.delete(URL_QUERY_PARAMS.record);
+    url.searchParams.delete(URL_QUERY_PARAMS.staging);
+    url.searchParams.set(
+      URL_QUERY_PARAMS.caseRun,
+      encodeURIComponent(state.selection.caseRunPath),
+    );
   } else {
     url.searchParams.delete(URL_QUERY_PARAMS.record);
     url.searchParams.delete(URL_QUERY_PARAMS.staging);
+    url.searchParams.delete(URL_QUERY_PARAMS.caseRun);
   }
 
   if (state.selectedInspectorTab !== defaultViewerUrlState.selectedInspectorTab) {
@@ -339,83 +374,86 @@ function syncViewerStateToUrl(state: ViewerUrlState): void {
 
   url.searchParams.set(URL_QUERY_PARAMS.browser, state.browserTab);
 
+  const supportsRecordFilters =
+    state.browserTab === "workbench" || state.browserTab === "dataset";
+
   if (state.browserTab === "staging" && state.sourceFilter !== defaultViewerUrlState.sourceFilter) {
     url.searchParams.set(URL_QUERY_PARAMS.source, state.sourceFilter);
   } else {
     url.searchParams.delete(URL_QUERY_PARAMS.source);
   }
 
-  if (state.browserTab !== "staging" && state.timeFilter.oldest) {
+  if (supportsRecordFilters && state.timeFilter.oldest) {
     url.searchParams.set(URL_QUERY_PARAMS.timeFrom, state.timeFilter.oldest);
   } else {
     url.searchParams.delete(URL_QUERY_PARAMS.timeFrom);
   }
-  if (state.browserTab !== "staging" && state.timeFilter.newest) {
+  if (supportsRecordFilters && state.timeFilter.newest) {
     url.searchParams.set(URL_QUERY_PARAMS.timeTo, state.timeFilter.newest);
   } else {
     url.searchParams.delete(URL_QUERY_PARAMS.timeTo);
   }
 
-  if (state.browserTab !== "staging" && state.modelFilter) {
+  if (supportsRecordFilters && state.modelFilter) {
     url.searchParams.set(URL_QUERY_PARAMS.model, state.modelFilter);
   } else {
     url.searchParams.delete(URL_QUERY_PARAMS.model);
   }
 
-  if (state.browserTab !== "staging" && state.sdkFilter) {
+  if (supportsRecordFilters && state.sdkFilter) {
     url.searchParams.set(URL_QUERY_PARAMS.sdk, state.sdkFilter);
   } else {
     url.searchParams.delete(URL_QUERY_PARAMS.sdk);
   }
 
   url.searchParams.delete(URL_QUERY_PARAMS.agentHarness);
-  if (state.browserTab !== "staging") {
+  if (supportsRecordFilters) {
     for (const agentHarnessFilter of [...state.agentHarnessFilters].sort((left, right) => left.localeCompare(right))) {
       url.searchParams.append(URL_QUERY_PARAMS.agentHarness, agentHarnessFilter);
     }
   }
 
   url.searchParams.delete(URL_QUERY_PARAMS.author);
-  if (state.browserTab !== "staging" && state.sourceFilter === "dataset") {
+  if (supportsRecordFilters && state.sourceFilter === "dataset") {
     for (const authorFilter of [...state.authorFilters].sort((left, right) => left.localeCompare(right))) {
       url.searchParams.append(URL_QUERY_PARAMS.author, authorFilter);
     }
   }
 
   url.searchParams.delete(URL_QUERY_PARAMS.category);
-  if (state.browserTab !== "staging" && state.sourceFilter === "dataset") {
+  if (supportsRecordFilters && state.sourceFilter === "dataset") {
     for (const categoryFilter of [...state.categoryFilters].sort((left, right) => left.localeCompare(right))) {
       url.searchParams.append(URL_QUERY_PARAMS.category, categoryFilter);
     }
   }
 
-  if (state.browserTab !== "staging" && state.costFilter.min != null) {
+  if (supportsRecordFilters && state.costFilter.min != null) {
     url.searchParams.set(URL_QUERY_PARAMS.costMin, String(state.costFilter.min));
   } else {
     url.searchParams.delete(URL_QUERY_PARAMS.costMin);
   }
 
-  if (state.browserTab !== "staging" && state.costFilter.max != null) {
+  if (supportsRecordFilters && state.costFilter.max != null) {
     url.searchParams.set(URL_QUERY_PARAMS.costMax, String(state.costFilter.max));
   } else {
     url.searchParams.delete(URL_QUERY_PARAMS.costMax);
   }
 
   url.searchParams.delete(URL_QUERY_PARAMS.rating);
-  if (state.browserTab !== "staging") {
+  if (supportsRecordFilters) {
     for (const ratingFilter of [...state.ratingFilter].sort((left, right) => left.localeCompare(right))) {
       url.searchParams.append(URL_QUERY_PARAMS.rating, ratingFilter);
     }
   }
 
   url.searchParams.delete(URL_QUERY_PARAMS.secondaryRating);
-  if (state.browserTab !== "staging") {
+  if (supportsRecordFilters) {
     for (const secondaryRatingFilter of [...state.secondaryRatingFilter].sort((left, right) => left.localeCompare(right))) {
       url.searchParams.append(URL_QUERY_PARAMS.secondaryRating, secondaryRatingFilter);
     }
   }
 
-  if (state.browserTab !== "staging" && state.selectedRunId) {
+  if (supportsRecordFilters && state.selectedRunId) {
     url.searchParams.set(URL_QUERY_PARAMS.run, state.selectedRunId);
   } else {
     url.searchParams.delete(URL_QUERY_PARAMS.run);
@@ -573,10 +611,22 @@ function viewerReducer(state: ViewerState, action: ViewerAction): ViewerState {
   switch (action.type) {
     case "SET_BOOTSTRAP": {
       const nextRecordCache = seedRecordCacheFromBootstrap(action.payload, state.recordCache);
+      let nextSelection = state.selection;
+      if (nextSelection?.kind === "case_run") {
+        const { caseRunPath } = nextSelection;
+        const stillExists = (action.payload.case_run_entries ?? []).some(
+          (entry) => entry.case_run_path === caseRunPath,
+        );
+        if (!stillExists) {
+          nextSelection = null;
+        }
+      }
       return {
         ...state,
         bootstrap: action.payload,
         recordCache: nextRecordCache,
+        selection: nextSelection,
+        selectedRecordId: selectionToSelectedRecordId(nextSelection),
         selectedRecordSummary:
           state.selectedRecordId != null
             ? nextRecordCache[state.selectedRecordId] ?? state.selectedRecordSummary
@@ -755,7 +805,7 @@ function viewerReducer(state: ViewerState, action: ViewerAction): ViewerState {
     case "SET_SEARCH":
       return { ...state, searchQuery: action.payload, multiSelection: new Set() };
     case "SET_BROWSER_TAB":
-      if (action.payload === "staging") {
+      if (action.payload === "staging" || action.payload === "case_runs") {
         return { ...state, browserTab: action.payload };
       }
       return {

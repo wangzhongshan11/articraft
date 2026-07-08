@@ -1,0 +1,49 @@
+{
+  "schema_version": "expected-joints.v1",
+  "required_joints": [
+    {
+      "name": "arm_fl",
+      "type": "revolute",
+      "parent": "<declare_in_output>",
+      "child": "<declare_in_output>",
+      "axis": "<declare_in_output>",
+      "limit_deg": [
+        0.0,
+        95.0
+      ]
+    },
+    {
+      "name": "arm_fr",
+      "type": "revolute",
+      "parent": "<declare_in_output>",
+      "child": "<declare_in_output>",
+      "axis": "<declare_in_output>",
+      "limit_deg": [
+        0.0,
+        95.0
+      ]
+    },
+    {
+      "name": "arm_rl",
+      "type": "revolute",
+      "parent": "<declare_in_output>",
+      "child": "<declare_in_output>",
+      "axis": "<declare_in_output>",
+      "limit_deg": [
+        0.0,
+        95.0
+      ]
+    },
+    {
+      "name": "arm_rr",
+      "type": "revolute",
+      "parent": "<declare_in_output>",
+      "child": "<declare_in_output>",
+      "axis": "<declare_in_output>",
+      "limit_deg": [
+        0.0,
+        95.0
+      ]
+    }
+  ]
+}

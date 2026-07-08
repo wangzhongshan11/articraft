@@ -1,0 +1,12 @@
+{
+  "case_id": "04_tiered_sewing_box",
+  "source_type": "Articraft-informed benchmark category",
+  "public_basis": "sewing boxes with hinged lids（论文的数据集类别示例）",
+  "articraft_record_id": null,
+  "record_selection_status": "TO_BE_FILLED_AFTER_LOCAL_VIEWER_OR_INDEX_SEARCH",
+  "search_terms": [
+    "tiered articulated sewing box",
+    "多层铰接缝纫收纳盒"
+  ],
+  "notes": "Select an Articraft-10K reference only after inspecting actual semantic parts, joint graph and trace. Do not equate a similar silhouette with a suitable kinematic reference."
+}

@@ -1,0 +1,23 @@
+{
+  "case_id": "F03",
+  "suite": "02_Furniture_10",
+  "case_dir": "test_cases/02_Furniture_10/cases/F03_slat_back_chair",
+  "prompt_file": "cases/F03_slat_back_chair/prompt_en.txt",
+  "reference_image": "test_cases/02_Furniture_10/cases/F03_slat_back_chair/reference_F03_slat_back_chair.png",
+  "image_used": "test_cases/02_Furniture_10/cases/F03_slat_back_chair/reference_F03_slat_back_chair.png",
+  "run_id": "case_f03_20260708t064725z",
+  "record_id": "bench_f03_20260708t064725z",
+  "status": "success",
+  "message": null,
+  "artifact_dir": "test_cases/02_Furniture_10/cases/F03_slat_back_chair/runs/20260708T064725Z",
+  "provider": "openai",
+  "model_id": "gpt-5.5",
+  "thinking_level": "med",
+  "turn_count": 21,
+  "tool_call_count": 23,
+  "compile_attempt_count": 5,
+  "total_cost_usd": 1.463698,
+  "compile_target": "visual",
+  "compile_error": null,
+  "compile_warnings": []
+}

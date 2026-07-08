@@ -317,6 +317,7 @@ class ViewerRunsStore(ViewerStoreComponent):
                 else []
             ),
             staging_entries=self.runs.list_staging_entries(summary_cache=summary_cache),
+            case_run_entries=self.case_runs.list_case_run_entries(),
             runs=self.runs.list_runs(),
             supercategories=self.taxonomy.list_supercategories(),
         )

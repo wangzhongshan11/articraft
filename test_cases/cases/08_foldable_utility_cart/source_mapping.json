@@ -1,0 +1,12 @@
+{
+  "case_id": "08_foldable_utility_cart",
+  "source_type": "Articraft-informed benchmark category",
+  "public_basis": "strollers（论文列举的典型铰接日常物件）",
+  "articraft_record_id": null,
+  "record_selection_status": "TO_BE_FILLED_AFTER_LOCAL_VIEWER_OR_INDEX_SEARCH",
+  "search_terms": [
+    "foldable utility-cart / stroller-frame model (non-load-bearing)",
+    "折叠式工具推车/婴儿车骨架模型（非承载）"
+  ],
+  "notes": "Select an Articraft-10K reference only after inspecting actual semantic parts, joint graph and trace. Do not equate a similar silhouette with a suitable kinematic reference."
+}

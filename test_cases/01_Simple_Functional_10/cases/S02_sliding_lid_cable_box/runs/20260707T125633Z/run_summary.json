@@ -1,0 +1,22 @@
+{
+  "case_id": "S02",
+  "suite": "01_Simple_Functional_10",
+  "case_dir": "test_cases/01_Simple_Functional_10/cases/S02_sliding_lid_cable_box",
+  "prompt_file": "cases/S02_sliding_lid_cable_box/prompt_en.txt",
+  "reference_image": "test_cases/01_Simple_Functional_10/cases/S02_sliding_lid_cable_box/reference_S02_sliding_lid_cable_box.png",
+  "image_used": "test_cases/01_Simple_Functional_10/cases/S02_sliding_lid_cable_box/reference_S02_sliding_lid_cable_box.png",
+  "run_id": "case_s02_20260707t125633z",
+  "record_id": "bench_s02_20260707t125633z",
+  "status": "failed",
+  "message": "LLM error: Connection error.",
+  "artifact_dir": "test_cases/01_Simple_Functional_10/cases/S02_sliding_lid_cable_box/runs/20260707T125633Z",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "thinking_level": "med",
+  "turn_count": 0,
+  "tool_call_count": 0,
+  "compile_attempt_count": 0,
+  "total_cost_usd": null,
+  "compile_target": "visual",
+  "compile_error": null
+}

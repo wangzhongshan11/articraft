@@ -1,0 +1,23 @@
+{
+  "case_id": "S08",
+  "suite": "01_Simple_Functional_10",
+  "case_dir": "test_cases/01_Simple_Functional_10/cases/S08_stackable_parts_bin",
+  "prompt_file": "cases/S08_stackable_parts_bin/prompt_en.txt",
+  "reference_image": "test_cases/01_Simple_Functional_10/cases/S08_stackable_parts_bin/reference_S08_stackable_parts_bin.png",
+  "image_used": "test_cases/01_Simple_Functional_10/cases/S08_stackable_parts_bin/reference_S08_stackable_parts_bin.png",
+  "run_id": "case_s08_20260708t054532z",
+  "record_id": "bench_s08_20260708t054532z",
+  "status": "success",
+  "message": null,
+  "artifact_dir": "test_cases/01_Simple_Functional_10/cases/S08_stackable_parts_bin/runs/20260708T054532Z",
+  "provider": "openai",
+  "model_id": "gpt-5.5",
+  "thinking_level": "med",
+  "turn_count": 9,
+  "tool_call_count": 10,
+  "compile_attempt_count": 1,
+  "total_cost_usd": 0.546407,
+  "compile_target": "visual",
+  "compile_error": null,
+  "compile_warnings": []
+}

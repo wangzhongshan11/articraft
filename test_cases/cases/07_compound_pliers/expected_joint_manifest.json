@@ -1,0 +1,38 @@
+{
+  "schema_version": "expected-joints.v1",
+  "required_joints": [
+    {
+      "name": "main_pivot",
+      "type": "revolute",
+      "parent": "<declare_in_output>",
+      "child": "<declare_in_output>",
+      "axis": "<declare_in_output>",
+      "limit_deg": [
+        0.0,
+        35.0
+      ]
+    },
+    {
+      "name": "link_left",
+      "type": "revolute",
+      "parent": "<declare_in_output>",
+      "child": "<declare_in_output>",
+      "axis": "<declare_in_output>",
+      "limit_deg": [
+        0.0,
+        35.0
+      ]
+    },
+    {
+      "name": "link_right",
+      "type": "revolute",
+      "parent": "<declare_in_output>",
+      "child": "<declare_in_output>",
+      "axis": "<declare_in_output>",
+      "limit_deg": [
+        0.0,
+        35.0
+      ]
+    }
+  ]
+}

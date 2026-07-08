@@ -1,0 +1,74 @@
+schema_version: "articraft-complex-3dprint-case.v1"
+case_id: "02_tilting_desk_fan"
+title_zh: "可俯仰桌面风扇（无电机功能原型）"
+title_en: "Tilting desk fan prototype"
+benchmark_tier: "complex_articulated_3d_print"
+objective: "Generate a complete tabletop-scale articulated printable model with semantic parts, URDF joints, source, printable mesh exports, and provenance evidence."
+safety_scope: "Desktop-scale non-safety-critical demonstrator only; not for real flight, cutting, heating, adult/child load bearing or medical use."
+input:
+  language: "zh"
+  prompt_file: "prompt_zh.md"
+  optional_reference_policy: "Reference images may be used only if their provenance is recorded."
+kinematics:
+  required_joints:
+    -
+      name: "impeller_spin"
+      type: "continuous"
+      parent: "<declare_in_output>"
+      child: "<declare_in_output>"
+      axis: "<declare_in_output>"
+      limit_deg:
+        - -360.0
+        - 360.0
+    -
+      name: "fan_tilt"
+      type: "revolute"
+      parent: "<declare_in_output>"
+      child: "<declare_in_output>"
+      axis: "<declare_in_output>"
+      limit_deg:
+        - -15.0
+        - 45.0
+  motion_probe_states:
+    - "rest"
+    - "mid"
+    - "limit"
+  must_be_collision_checked: true
+deliverables:
+  required:
+    - "model.py"
+    - "model.urdf"
+    - "part_manifest.json"
+    - "joint_manifest.json"
+    - "events.jsonl"
+    - "artifact_manifest.json"
+    - "run_metadata.json"
+    - "metrics.json"
+  preferred:
+    - "model.step"
+    - "model.3mf"
+    - "preview.png"
+    - "orthographic_views"
+    - "motion_probe_images"
+  print_mesh:
+    - "STL or 3MF per printable part"
+  min_semantic_parts: 7
+manufacturing:
+  fdm_profile: "../../config/fdm_baseline.json"
+  required_checks:
+    - "grille_min_feature_ge_1.6mm"
+    - "blade_to_grille_clearance_ge_3mm"
+    - "joint_clearance_ge_0.30mm"
+    - "separate_printable_parts"
+evaluation_focus:
+  - "radial array"
+  - "rotational kinematics"
+  - "tilt axis"
+  - "part separation"
+  - "safety clearance"
+scoring:
+  kinematics: 30
+  part_semantics: 15
+  printability: 25
+  artifact_completeness: 15
+  traceability: 15

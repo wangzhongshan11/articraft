@@ -1,0 +1,10 @@
+{
+  "target": "visual",
+  "warnings": [],
+  "signal_bundle": {
+    "status": "success",
+    "summary": "status=success failures=0 warnings=0 notes=0\nCompile passed cleanly.",
+    "signals": []
+  },
+  "model_urdf": "model.urdf"
+}

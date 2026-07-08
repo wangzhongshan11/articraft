@@ -1,0 +1,38 @@
+{
+  "schema_version": "expected-joints.v1",
+  "required_joints": [
+    {
+      "name": "lower_arm_yaw",
+      "type": "revolute",
+      "parent": "<declare_in_output>",
+      "child": "<declare_in_output>",
+      "axis": "<declare_in_output>",
+      "limit_deg": [
+        -70.0,
+        70.0
+      ]
+    },
+    {
+      "name": "upper_arm_pitch",
+      "type": "revolute",
+      "parent": "<declare_in_output>",
+      "child": "<declare_in_output>",
+      "axis": "<declare_in_output>",
+      "limit_deg": [
+        -20.0,
+        115.0
+      ]
+    },
+    {
+      "name": "lamp_head_pitch",
+      "type": "revolute",
+      "parent": "<declare_in_output>",
+      "child": "<declare_in_output>",
+      "axis": "<declare_in_output>",
+      "limit_deg": [
+        -45.0,
+        80.0
+      ]
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "case_id": "F02",
+  "suite": "02_Furniture_10",
+  "case_dir": "test_cases/02_Furniture_10/cases/F02_simple_dining_chair",
+  "prompt_file": "cases/F02_simple_dining_chair/prompt_en.txt",
+  "reference_image": "test_cases/02_Furniture_10/cases/F02_simple_dining_chair/reference_F02_simple_dining_chair.png",
+  "image_used": "test_cases/02_Furniture_10/cases/F02_simple_dining_chair/reference_F02_simple_dining_chair.png",
+  "run_id": "case_f02_20260708t063949z",
+  "record_id": "bench_f02_20260708t063949z",
+  "status": "success",
+  "message": null,
+  "artifact_dir": "test_cases/02_Furniture_10/cases/F02_simple_dining_chair/runs/20260708T063949Z",
+  "provider": "openai",
+  "model_id": "gpt-5.5",
+  "thinking_level": "med",
+  "turn_count": 10,
+  "tool_call_count": 11,
+  "compile_attempt_count": 2,
+  "total_cost_usd": 0.61397,
+  "compile_target": "visual",
+  "compile_error": null,
+  "compile_warnings": []
+}

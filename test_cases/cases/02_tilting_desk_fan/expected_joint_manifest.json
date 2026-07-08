@@ -1,0 +1,27 @@
+{
+  "schema_version": "expected-joints.v1",
+  "required_joints": [
+    {
+      "name": "impeller_spin",
+      "type": "continuous",
+      "parent": "<declare_in_output>",
+      "child": "<declare_in_output>",
+      "axis": "<declare_in_output>",
+      "limit_deg": [
+        -360.0,
+        360.0
+      ]
+    },
+    {
+      "name": "fan_tilt",
+      "type": "revolute",
+      "parent": "<declare_in_output>",
+      "child": "<declare_in_output>",
+      "axis": "<declare_in_output>",
+      "limit_deg": [
+        -15.0,
+        45.0
+      ]
+    }
+  ]
+}

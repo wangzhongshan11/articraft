@@ -6,6 +6,7 @@ import type {
   DeleteStagingResult,
   DeleteRecordResult,
   OpenRecordFolderResult,
+  OpenCaseRunFolderResult,
   OpenStagingFolderResult,
   RecordHistory,
   RecordBrowseIdsResponse,
@@ -476,6 +477,70 @@ export async function openStagingFolder(runId: string, recordId: string): Promis
     throw new Error(await readErrorMessage(response));
   }
   return (await response.json()) as OpenStagingFolderResult;
+}
+
+export function encodeCaseRunPath(caseRunPath: string): string {
+  return caseRunPath
+    .split("/")
+    .filter((segment) => segment.length > 0)
+    .map((segment) => encodeURIComponent(segment))
+    .join("/");
+}
+
+export async function fetchCaseRunEntries(): Promise<ViewerBootstrap["case_run_entries"]> {
+  return fetchJson<ViewerBootstrap["case_run_entries"]>("/api/case-runs");
+}
+
+export async function fetchCaseRunFile(caseRunPath: string, filePath: string): Promise<string> {
+  const response = await fetch(
+    `/api/case-runs/${encodeCaseRunPath(caseRunPath)}/files/${filePath}`,
+  );
+  if (!response.ok) {
+    throw new Error(await readErrorMessage(response));
+  }
+  return response.text();
+}
+
+export async function fetchCaseRunTextFile(
+  caseRunPath: string,
+  filePath: string,
+  options?: {
+    full?: boolean;
+    previewBytes?: number;
+  },
+): Promise<RecordTextFileResult> {
+  const searchParams = new URLSearchParams();
+  if (options?.full) {
+    searchParams.set("full", "true");
+  }
+  if (options?.previewBytes != null) {
+    searchParams.set("preview_bytes", String(options.previewBytes));
+  }
+  const query = searchParams.size > 0 ? `?${searchParams.toString()}` : "";
+  return fetchJson<RecordTextFileResult>(
+    `/api/case-runs/${encodeCaseRunPath(caseRunPath)}/text/${filePath}${query}`,
+  );
+}
+
+export async function fetchCaseRunTraceFile(caseRunPath: string, filePath: string): Promise<string> {
+  const response = await fetch(
+    `/api/case-runs/${encodeCaseRunPath(caseRunPath)}/traces/${filePath}`,
+  );
+  if (!response.ok) {
+    throw new Error(await readErrorMessage(response));
+  }
+  return response.text();
+}
+
+export async function openCaseRunFolder(caseRunPath: string): Promise<OpenCaseRunFolderResult> {
+  const response = await fetch(
+    `/api/case-runs/${encodeCaseRunPath(caseRunPath)}/open-folder`,
+    { method: "POST" },
+  );
+  if (!response.ok) {
+    throw new Error(await readErrorMessage(response));
+  }
+  return (await response.json()) as OpenCaseRunFolderResult;
 }
 
 export async function saveRecordRating(recordId: string, rating: number): Promise<RecordRatingResponse> {

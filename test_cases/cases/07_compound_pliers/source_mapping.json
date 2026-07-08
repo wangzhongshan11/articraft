@@ -1,0 +1,12 @@
+{
+  "case_id": "07_compound_pliers",
+  "source_type": "Articraft-informed benchmark category",
+  "public_basis": "pliers（论文列举的典型铰接日常物件）",
+  "articraft_record_id": null,
+  "record_selection_status": "TO_BE_FILLED_AFTER_LOCAL_VIEWER_OR_INDEX_SEARCH",
+  "search_terms": [
+    "compound-leverage pliers demonstrator",
+    "复合杠杆钳/夹爪演示器"
+  ],
+  "notes": "Select an Articraft-10K reference only after inspecting actual semantic parts, joint graph and trace. Do not equate a similar silhouette with a suitable kinematic reference."
+}
