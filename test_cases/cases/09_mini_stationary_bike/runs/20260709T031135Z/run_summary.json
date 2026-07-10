@@ -1,0 +1,23 @@
+{
+  "case_id": "09_mini_stationary_bike",
+  "suite": "cases",
+  "case_dir": "test_cases/cases/09_mini_stationary_bike",
+  "prompt_file": "prompt_zh.md",
+  "reference_image": "test_cases/cases/09_mini_stationary_bike/09.png",
+  "image_used": "test_cases/cases/09_mini_stationary_bike/09.png",
+  "run_id": "case_09_mini_stationary_bike_20260709t031135z",
+  "record_id": "bench_09_mini_stationary_bike_20260709t031135z",
+  "status": "success",
+  "message": null,
+  "artifact_dir": "test_cases/cases/09_mini_stationary_bike/runs/20260709T031135Z",
+  "provider": "openai",
+  "model_id": "gpt-5.5",
+  "thinking_level": "med",
+  "turn_count": 52,
+  "tool_call_count": 53,
+  "compile_attempt_count": 11,
+  "total_cost_usd": 3.155039,
+  "compile_target": "visual",
+  "compile_error": null,
+  "compile_warnings": []
+}

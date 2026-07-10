@@ -1,0 +1,23 @@
+{
+  "case_id": "04_tiered_sewing_box",
+  "suite": "cases",
+  "case_dir": "test_cases/cases/04_tiered_sewing_box",
+  "prompt_file": "prompt_zh.md",
+  "reference_image": "test_cases/cases/04_tiered_sewing_box/04.png",
+  "image_used": "test_cases/cases/04_tiered_sewing_box/04.png",
+  "run_id": "case_04_tiered_sewing_box_20260709t015745z",
+  "record_id": "bench_04_tiered_sewing_box_20260709t015745z",
+  "status": "success",
+  "message": null,
+  "artifact_dir": "test_cases/cases/04_tiered_sewing_box/runs/20260709T015745Z",
+  "provider": "openai",
+  "model_id": "gpt-5.5",
+  "thinking_level": "med",
+  "turn_count": 40,
+  "tool_call_count": 41,
+  "compile_attempt_count": 8,
+  "total_cost_usd": 1.56599,
+  "compile_target": "visual",
+  "compile_error": null,
+  "compile_warnings": []
+}

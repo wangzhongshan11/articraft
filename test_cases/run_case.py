@@ -12,6 +12,7 @@ import logging
 import re
 import shutil
 import sys
+import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -23,6 +24,12 @@ from agent.compiler import compile_urdf_report, persist_compile_success_artifact
 from agent.cost import max_cost_usd_from_env, parse_max_cost_usd
 from agent.providers.factory import validate_provider_credentials
 from agent.providers.openai import DEFAULT_OPENAI_MODEL
+from agent.providers.openai_api_surface import (
+    classify_provider_failure_kind,
+    openai_compaction_mode,
+    resolve_openai_api_surface,
+    validate_openai_provider_options,
+)
 from agent.record_persistence import _remove_tree_if_exists
 from agent.run_context import (
     _read_logged_cost_totals,
@@ -30,6 +37,7 @@ from agent.run_context import (
 )
 from agent.single_run import run_from_input_impl
 from agent.tools import build_initial_user_content, resolve_image_path
+from agent.tui.console_support import ensure_utf8_stdio
 from articraft.values import DEFAULT_THINKING_LEVEL, PROVIDER_VALUES, THINKING_LEVEL_VALUES
 
 TEST_CASES_ROOT = Path(__file__).resolve().parent
@@ -151,6 +159,14 @@ def _all_case_specs() -> list[CaseSpec]:
     return specs
 
 
+def list_case_specs() -> list[CaseSpec]:
+    return _all_case_specs()
+
+
+def case_run_ref(spec: CaseSpec) -> str:
+    return spec.case_dir.relative_to(TEST_CASES_ROOT).as_posix()
+
+
 def _resolve_case_ref(case_ref: str, *, suite_hint: str | None) -> CaseSpec:
     normalized = case_ref.strip().replace("\\", "/")
     if not normalized:
@@ -255,6 +271,41 @@ def _write_json(path: Path, payload: dict[str, Any]) -> None:
     path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
 
 
+def _run_observability_fields(
+    *,
+    args: argparse.Namespace,
+    status: str,
+    message: str | None,
+    cost_path: Path | None,
+    duration_seconds: float | None,
+) -> dict[str, Any]:
+    tokens: dict[str, int] | None = None
+    total_cost: float | None = None
+    if cost_path is not None and cost_path.is_file():
+        tokens, total_cost = _read_logged_cost_totals(cost_path)
+
+    fields: dict[str, Any] = {
+        "thinking_level": args.thinking,
+    }
+    if args.provider == "openai":
+        fields["openai_api"] = args.openai_api
+        fields["openai_transport"] = args.openai_transport
+        fields["compaction_mode"] = openai_compaction_mode(args.openai_api)
+    if duration_seconds is not None:
+        fields["duration_seconds"] = round(duration_seconds, 3)
+    if total_cost is not None:
+        fields["total_cost_usd"] = total_cost
+    if tokens:
+        for key in ("total_tokens", "cached_tokens", "prompt_tokens"):
+            value = tokens.get(key)
+            if isinstance(value, int):
+                fields[key] = value
+    failure_kind = classify_provider_failure_kind(status=status, message=message)
+    if failure_kind:
+        fields["failure_kind"] = failure_kind
+    return fields
+
+
 def _materialize_case_compile(
     *,
     model_path: Path,
@@ -316,6 +367,7 @@ async def _run_case(args: argparse.Namespace) -> int:
     run_token = _utc_run_token()
     artifact_dir = (case.case_dir / "runs" / run_token).resolve()
     user_content = build_initial_user_content(prompt_text, image_path=image_path)
+    run_started = time.monotonic()
 
     outcome = await run_from_input_impl(
         user_content,
@@ -326,6 +378,7 @@ async def _run_case(args: argparse.Namespace) -> int:
         provider=args.provider,
         model_id=args.model,
         openai_transport=args.openai_transport,
+        openai_api=args.openai_api,
         thinking_level=args.thinking,
         max_turns=args.max_turns,
         system_prompt_path=args.system_prompt,
@@ -340,6 +393,8 @@ async def _run_case(args: argparse.Namespace) -> int:
         persist_record=False,
         cleanup_staging_dir=False,
     )
+
+    duration_seconds = time.monotonic() - run_started
 
     staging_dir = outcome.staging_dir
     if staging_dir is None or not staging_dir.exists():
@@ -358,6 +413,13 @@ async def _run_case(args: argparse.Namespace) -> int:
             "artifact_dir": _relative_to_repo(artifact_dir, repo_root),
             "provider": outcome.provider,
             "model_id": outcome.model_id,
+            **_run_observability_fields(
+                args=args,
+                status=outcome.status,
+                message=outcome.message,
+                cost_path=None,
+                duration_seconds=duration_seconds,
+            ),
         }
         _write_json(artifact_dir / "run_summary.json", summary)
         print(json.dumps(summary, indent=2))
@@ -382,7 +444,6 @@ async def _run_case(args: argparse.Namespace) -> int:
             compile_error = str(exc)
 
     cost_path = artifact_dir / "cost.json"
-    _, total_cost = _read_logged_cost_totals(cost_path)
 
     summary: dict[str, Any] = {
         "case_id": case.case_id,
@@ -400,13 +461,18 @@ async def _run_case(args: argparse.Namespace) -> int:
         "artifact_dir": _relative_to_repo(artifact_dir, repo_root),
         "provider": outcome.provider,
         "model_id": outcome.model_id,
-        "thinking_level": args.thinking,
         "turn_count": outcome.turn_count,
         "tool_call_count": outcome.tool_call_count,
         "compile_attempt_count": outcome.compile_attempt_count,
-        "total_cost_usd": total_cost,
         "compile_target": args.compile_target,
         "compile_error": compile_error,
+        **_run_observability_fields(
+            args=args,
+            status=outcome.status,
+            message=outcome.message,
+            cost_path=cost_path,
+            duration_seconds=duration_seconds,
+        ),
     }
     if compile_payload is not None:
         summary["compile_warnings"] = compile_payload.get("warnings", [])
@@ -466,6 +532,12 @@ def _build_parser() -> argparse.ArgumentParser:
         help="OpenAI transport mode.",
     )
     parser.add_argument(
+        "--openai-api",
+        default=None,
+        choices=["responses", "chat_completions"],
+        help="OpenAI API surface for --provider openai. Defaults to responses.",
+    )
+    parser.add_argument(
         "--thinking",
         default=DEFAULT_THINKING_LEVEL,
         choices=THINKING_LEVEL_VALUES,
@@ -488,6 +560,7 @@ def _build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> int:
+    ensure_utf8_stdio()
     logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
     load_dotenv()
 
@@ -511,6 +584,17 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.provider != "openai" and args.openai_transport != "http":
         print("--openai-transport is only supported for --provider openai.", file=sys.stderr)
+        return 1
+
+    try:
+        args.openai_api = validate_openai_provider_options(
+            provider=args.provider,
+            openai_api=resolve_openai_api_surface(cli_value=args.openai_api),
+            openai_transport=args.openai_transport,
+            cli_openai_api=args.openai_api,
+        )
+    except ValueError as exc:
+        print(str(exc), file=sys.stderr)
         return 1
 
     return asyncio.run(_run_case(args))

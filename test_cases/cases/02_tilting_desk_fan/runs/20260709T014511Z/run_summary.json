@@ -1,0 +1,23 @@
+{
+  "case_id": "02_tilting_desk_fan",
+  "suite": "cases",
+  "case_dir": "test_cases/cases/02_tilting_desk_fan",
+  "prompt_file": "prompt_zh.md",
+  "reference_image": "test_cases/cases/02_tilting_desk_fan/02.png",
+  "image_used": "test_cases/cases/02_tilting_desk_fan/02.png",
+  "run_id": "case_02_tilting_desk_fan_20260709t014511z",
+  "record_id": "bench_02_tilting_desk_fan_20260709t014511z",
+  "status": "success",
+  "message": null,
+  "artifact_dir": "test_cases/cases/02_tilting_desk_fan/runs/20260709T014511Z",
+  "provider": "openai",
+  "model_id": "gpt-5.5",
+  "thinking_level": "med",
+  "turn_count": 15,
+  "tool_call_count": 20,
+  "compile_attempt_count": 4,
+  "total_cost_usd": 0.905894,
+  "compile_target": "visual",
+  "compile_error": null,
+  "compile_warnings": []
+}

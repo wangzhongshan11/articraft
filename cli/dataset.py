@@ -284,6 +284,8 @@ def _run_single_category_workflow(
     sdk_package: str,
     dataset_id: str | None,
     record_id: str | None,
+    openai_transport: str = "http",
+    openai_api: str = "responses",
 ) -> tuple[str, str, dict, object]:
     normalized_prompt = prompt.strip()
     if not normalized_prompt:
@@ -318,6 +320,8 @@ def _run_single_category_workflow(
             image_path=image_path,
             provider=provider,
             model_id=model_id,
+            openai_transport=openai_transport,
+            openai_api=openai_api,
             thinking_level=thinking_level,
             max_turns=max_turns,
             max_cost_usd=max_cost_usd,
@@ -676,6 +680,18 @@ def _build_parser() -> argparse.ArgumentParser:
         default=DEFAULT_THINKING_LEVEL,
         choices=THINKING_LEVEL_VALUES,
         help="Thinking budget level for the generation run.",
+    )
+    run_single.add_argument(
+        "--openai-transport",
+        default="http",
+        choices=["http", "websocket"],
+        help="Transport for --provider openai.",
+    )
+    run_single.add_argument(
+        "--openai-api",
+        default=None,
+        choices=["responses", "chat_completions"],
+        help="OpenAI API surface for --provider openai. Defaults to responses.",
     )
     run_single.add_argument(
         "--max-turns",
@@ -1039,7 +1055,14 @@ def main(argv: list[str] | None = None) -> int:
         repo.ensure_layout()
         warn_if_post_commit_hook_missing(args.repo_root)
         try:
+            from agent.providers.openai_api_surface import resolve_openai_generation_options
+
             sdk_package = normalize_sdk_package(args.sdk_package)
+            openai_api, openai_transport = resolve_openai_generation_options(
+                provider=args.provider,
+                openai_api_cli=args.openai_api,
+                openai_transport=args.openai_transport,
+            )
             max_cost_usd = (
                 parse_max_cost_usd(args.max_cost_usd, label="--max-cost-usd")
                 if args.max_cost_usd is not None
@@ -1060,6 +1083,8 @@ def main(argv: list[str] | None = None) -> int:
                 sdk_package=sdk_package,
                 dataset_id=args.dataset_id,
                 record_id=args.record_id,
+                openai_transport=openai_transport,
+                openai_api=openai_api,
             )
         except ValueError as exc:
             print(str(exc))

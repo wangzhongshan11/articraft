@@ -20,14 +20,94 @@ GEMINI_FLASH_PRICING: dict[str, float] = {
     "output": 3.00,
 }
 
+GEMINI_3_1_FLASH_LITE_PRICING: dict[str, float] = {
+    "input_uncached": 0.25,
+    "input_cached": 0.025,
+    "output": 1.50,
+}
+
 GEMINI_3_PRO_PRICING: dict[str, float] = {
     "input_uncached": 2.00,
-    "input_cached": 2.00,
+    "input_cached": 0.20,
     "output": 12.00,
     "prompt_tier_threshold_tokens": 200_000,
     "input_uncached_above_threshold": 4.00,
-    "input_cached_above_threshold": 4.00,
+    "input_cached_above_threshold": 0.40,
     "output_above_threshold": 18.00,
+}
+
+DEEPSEEK_V4_PRO_PRICING: dict[str, float] = {
+    "input_uncached": 0.435,
+    "input_cached": 0.003625,
+    "output": 0.87,
+}
+
+DEEPSEEK_V4_FLASH_PRICING: dict[str, float] = {
+    "input_uncached": 0.14,
+    "input_cached": 0.0028,
+    "output": 0.28,
+}
+
+GLM_5_2_PRICING: dict[str, float] = {
+    "input_uncached": 1.40,
+    "input_cached": 0.26,
+    "output": 4.40,
+}
+
+GLM_5_PRICING: dict[str, float] = {
+    "input_uncached": 1.00,
+    "input_cached": 0.20,
+    "output": 3.20,
+}
+
+GLM_4_7_PRICING: dict[str, float] = {
+    "input_uncached": 0.60,
+    "input_cached": 0.11,
+    "output": 2.20,
+}
+
+GLM_4_5_AIR_PRICING: dict[str, float] = {
+    "input_uncached": 0.20,
+    "input_cached": 0.03,
+    "output": 1.10,
+}
+
+GLM_4_7_FLASHX_PRICING: dict[str, float] = {
+    "input_uncached": 0.07,
+    "input_cached": 0.01,
+    "output": 0.40,
+}
+
+GLM_4_7_FLASH_PRICING: dict[str, float] = {
+    "input_uncached": 0.00,
+    "input_cached": 0.00,
+    "output": 0.00,
+}
+
+QWEN_3_7_MAX_PRICING: dict[str, float] = {
+    "input_uncached": 2.50,
+    "input_cached": 1.25,
+    "output": 7.50,
+}
+
+QWEN_3_7_PLUS_PRICING: dict[str, float] = {
+    "input_uncached": 0.40,
+    "input_cached": 0.20,
+    "output": 1.60,
+    "prompt_tier_threshold_tokens": 256_000,
+    "input_uncached_above_threshold": 1.20,
+    "input_cached_above_threshold": 0.60,
+    "output_above_threshold": 4.80,
+}
+
+QWEN_3_6_FLASH_PRICING: dict[str, float] = {
+    "input_uncached": 0.25,
+    "input_cached": 0.125,
+    "output": 1.50,
+    "prompt_tier_threshold_tokens": 256_000,
+    "input_uncached_above_threshold": 1.00,
+    "input_cached_above_threshold": 0.50,
+    "output_above_threshold": 4.00,
 }
 
 OPENAI_GPT_5_3_CODEX_PRICING: dict[str, float] = {
@@ -196,6 +276,7 @@ class CostTracker:
 
     model_id: str
     pricing: dict[str, float]
+    run_settings: dict[str, object] | None = None
     total_breakdown: CostBreakdown = field(default_factory=CostBreakdown)
     maintenance_breakdown: CostBreakdown = field(default_factory=CostBreakdown)
     turn_breakdowns: list[CostBreakdown] = field(default_factory=list)
@@ -293,7 +374,7 @@ class CostTracker:
 
     def to_dict(self) -> dict[str, object]:
         all_in_total = self.all_in_total_breakdown()
-        return {
+        payload: dict[str, object] = {
             "model_id": self.model_id,
             "total": _breakdown_dict(self.total_breakdown),
             "maintenance_total": _breakdown_dict(self.maintenance_breakdown),
@@ -307,6 +388,9 @@ class CostTracker:
             ],
             "maintenance_events": self.maintenance_events,
         }
+        if self.run_settings:
+            payload["settings"] = self.run_settings
+        return payload
 
     def save_json(self, path: Path) -> None:
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -314,12 +398,132 @@ class CostTracker:
 
 
 def is_flash_model(model_id: str) -> bool:
-    return "flash" in model_id.lower()
+    normalized = (model_id or "").strip().lower()
+    return "flash" in normalized and "flash-lite" not in normalized and "flashx" not in normalized
+
+
+def is_gemini_flash_lite_model(model_id: str) -> bool:
+    normalized = (model_id or "").strip().lower()
+    return "flash-lite" in normalized
 
 
 def is_gemini_3_pro_model(model_id: str) -> bool:
     normalized = (model_id or "").strip().lower()
     return normalized.startswith("gemini-3") and "pro" in normalized
+
+
+def is_deepseek_v4_pro_model(model_id: str) -> bool:
+    return (model_id or "").strip().lower().startswith("deepseek-v4-pro")
+
+
+def is_deepseek_v4_flash_model(model_id: str) -> bool:
+    normalized = (model_id or "").strip().lower()
+    if normalized.startswith("deepseek-v4-pro"):
+        return False
+    return normalized.startswith(
+        ("deepseek-v4-flash", "deepseek-reasoner", "deepseek-chat", "deepseek")
+    )
+
+
+def is_glm_5_2_model(model_id: str) -> bool:
+    normalized = (model_id or "").strip().lower()
+    return normalized.startswith("glm-5.2") or normalized.startswith("glm-5.1")
+
+
+def is_glm_5_model(model_id: str) -> bool:
+    normalized = (model_id or "").strip().lower()
+    return normalized.startswith("glm-5") and not normalized.startswith(("glm-5.1", "glm-5.2"))
+
+
+def is_glm_4_7_flashx_model(model_id: str) -> bool:
+    return (model_id or "").strip().lower().startswith("glm-4.7-flashx")
+
+
+def is_glm_4_7_flash_model(model_id: str) -> bool:
+    normalized = (model_id or "").strip().lower()
+    return normalized.startswith("glm-4.7-flash")
+
+
+def is_glm_4_5_air_model(model_id: str) -> bool:
+    normalized = (model_id or "").strip().lower()
+    return normalized.startswith("glm-4.5-air")
+
+
+def is_glm_4_model(model_id: str) -> bool:
+    return (model_id or "").strip().lower().startswith("glm-4")
+
+
+def is_glm_model(model_id: str) -> bool:
+    return (model_id or "").strip().lower().startswith("glm")
+
+
+def is_qwen_max_model(model_id: str) -> bool:
+    normalized = (model_id or "").strip().lower()
+    return normalized.startswith("qwen3.7-max") or normalized.startswith("qwen-max")
+
+
+def is_qwen_plus_model(model_id: str) -> bool:
+    normalized = (model_id or "").strip().lower()
+    return normalized.startswith("qwen3.7-plus") or normalized.startswith("qwen-plus")
+
+
+def is_qwen_flash_model(model_id: str) -> bool:
+    normalized = (model_id or "").strip().lower()
+    return normalized.startswith("qwen3.6-flash") or normalized.startswith("qwen-turbo")
+
+
+def is_qwen_model(model_id: str) -> bool:
+    return (model_id or "").strip().lower().startswith("qwen")
+
+
+def _pricing_for_model_id(model_id: str) -> dict[str, float] | None:
+    if is_deepseek_v4_pro_model(model_id):
+        return DEEPSEEK_V4_PRO_PRICING
+    if is_deepseek_v4_flash_model(model_id):
+        return DEEPSEEK_V4_FLASH_PRICING
+    if is_glm_5_2_model(model_id):
+        return GLM_5_2_PRICING
+    if is_glm_5_model(model_id):
+        return GLM_5_PRICING
+    if is_glm_4_7_flashx_model(model_id):
+        return GLM_4_7_FLASHX_PRICING
+    if is_glm_4_7_flash_model(model_id):
+        return GLM_4_7_FLASH_PRICING
+    if is_glm_4_5_air_model(model_id):
+        return GLM_4_5_AIR_PRICING
+    if is_glm_4_model(model_id) or is_glm_model(model_id):
+        return GLM_4_7_PRICING
+    if is_qwen_max_model(model_id):
+        return QWEN_3_7_MAX_PRICING
+    if is_qwen_plus_model(model_id):
+        return QWEN_3_7_PLUS_PRICING
+    if is_qwen_flash_model(model_id):
+        return QWEN_3_6_FLASH_PRICING
+    if is_qwen_model(model_id):
+        return QWEN_3_7_PLUS_PRICING
+    if is_gemini_flash_lite_model(model_id):
+        return GEMINI_3_1_FLASH_LITE_PRICING
+    if is_flash_model(model_id):
+        return GEMINI_FLASH_PRICING
+    if is_gemini_3_pro_model(model_id):
+        return GEMINI_3_PRO_PRICING
+    if is_gpt_5_5_model(model_id):
+        return OPENAI_GPT_5_5_PRICING
+    if is_gpt_5_4_model(model_id):
+        return OPENAI_GPT_5_4_PRICING
+    if is_gpt_5_3_codex_model(model_id) or is_gpt_5_2_model(model_id):
+        return OPENAI_GPT_5_3_CODEX_PRICING
+    if is_claude_opus_4_7_model(model_id):
+        return ANTHROPIC_OPUS_4_7_PRICING
+    if is_claude_opus_4_6_model(model_id):
+        return ANTHROPIC_OPUS_4_6_PRICING
+    if is_claude_opus_4_5_model(model_id):
+        return ANTHROPIC_OPUS_4_5_PRICING
+    if is_claude_sonnet_4_model(model_id):
+        return ANTHROPIC_SONNET_4_PRICING
+    if is_claude_haiku_4_5_model(model_id):
+        return ANTHROPIC_HAIKU_4_5_PRICING
+    return None
 
 
 def is_gpt_5_2_model(model_id: str) -> bool:
@@ -360,12 +564,12 @@ def is_claude_haiku_4_5_model(model_id: str) -> bool:
 
 
 def pricing_for_provider_model(provider: str, model_id: str) -> dict[str, float] | None:
-    if not (provider or "").strip():
+    if not (provider or "").strip() and not (model_id or "").strip():
         return None
     try:
         provider_norm = normalize_provider_name(provider)
     except ValueError:
-        return None
+        return _pricing_for_model_id(model_id)
     if provider_norm is ProviderName.ANTHROPIC and is_claude_opus_4_7_model(model_id):
         return ANTHROPIC_OPUS_4_7_PRICING
     if provider_norm is ProviderName.ANTHROPIC and is_claude_opus_4_6_model(model_id):
@@ -376,6 +580,8 @@ def pricing_for_provider_model(provider: str, model_id: str) -> dict[str, float]
         return ANTHROPIC_SONNET_4_PRICING
     if provider_norm is ProviderName.ANTHROPIC and is_claude_haiku_4_5_model(model_id):
         return ANTHROPIC_HAIKU_4_5_PRICING
+    if provider_norm is ProviderName.GEMINI and is_gemini_flash_lite_model(model_id):
+        return GEMINI_3_1_FLASH_LITE_PRICING
     if provider_norm is ProviderName.GEMINI and is_flash_model(model_id):
         return GEMINI_FLASH_PRICING
     if provider_norm is ProviderName.GEMINI and is_gemini_3_pro_model(model_id):
@@ -388,7 +594,7 @@ def pricing_for_provider_model(provider: str, model_id: str) -> dict[str, float]
         is_gpt_5_3_codex_model(model_id) or is_gpt_5_2_model(model_id)
     ):
         return OPENAI_GPT_5_3_CODEX_PRICING
-    return None
+    return _pricing_for_model_id(model_id)
 
 
 def parse_max_cost_usd(value: object, *, label: str = "max_cost_usd") -> float | None:

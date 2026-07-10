@@ -30,6 +30,7 @@ from viewer.api.store_values import (
     _cost_totals,
     _effective_rating,
     _normalize_sdk_package_value,
+    _openai_api_from_provenance,
     _parse_sort_key,
     _thinking_level_from_provenance,
 )
@@ -190,6 +191,7 @@ class ViewerRecordsStore(ViewerStoreComponent):
 
         turn_count: int | None = None
         thinking_level: str | None = None
+        openai_api: str | None = None
         run_status: str | None = None
         run_message: str | None = None
         if isinstance(provenance, dict):
@@ -198,6 +200,7 @@ class ViewerRecordsStore(ViewerStoreComponent):
                 turn_count = _coerce_int(run_summary.get("turn_count"))
                 run_status = _coerce_string(run_summary.get("final_status"))
             thinking_level = _thinking_level_from_provenance(provenance)
+            openai_api = _openai_api_from_provenance(provenance)
 
         total_cost_usd, input_tokens, output_tokens = _cost_totals(cost)
 
@@ -228,6 +231,7 @@ class ViewerRecordsStore(ViewerStoreComponent):
             sdk_package=_normalize_sdk_package_value(record.get("sdk_package")),
             provider=record.get("provider"),
             model_id=record.get("model_id"),
+            openai_api=openai_api,
             creator_mode=creator_mode,
             external_agent=external_agent,
             agent_harness=agent_harness,
@@ -301,11 +305,13 @@ class ViewerRecordsStore(ViewerStoreComponent):
 
         turn_count: int | None = None
         thinking_level: str | None = None
+        openai_api: str | None = None
         if isinstance(provenance, dict):
             run_summary = provenance.get("run_summary")
             if isinstance(run_summary, dict):
                 turn_count = _coerce_int(run_summary.get("turn_count"))
             thinking_level = _thinking_level_from_provenance(provenance)
+            openai_api = _openai_api_from_provenance(provenance)
 
         total_cost_usd, input_tokens, output_tokens = _cost_totals(cost)
 
@@ -328,6 +334,7 @@ class ViewerRecordsStore(ViewerStoreComponent):
             sdk_package=_normalize_sdk_package_value(record.get("sdk_package")),
             provider=record.get("provider"),
             model_id=record.get("model_id"),
+            openai_api=openai_api,
             creator_mode=creator_mode,
             external_agent=external_agent,
             agent_harness=agent_harness,

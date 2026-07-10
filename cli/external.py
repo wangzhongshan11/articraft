@@ -356,6 +356,7 @@ def _external_provenance(
             model_id=model_id,
             thinking_level=thinking_level,
             openai_transport=None,
+            openai_api=None,
             openai_reasoning_summary=None,
             max_turns=None,
             max_cost_usd=None,

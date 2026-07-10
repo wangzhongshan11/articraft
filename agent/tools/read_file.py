@@ -4,8 +4,7 @@ ReadFile tool - Read an exact file from the virtual workspace with line numbers.
 
 from __future__ import annotations
 
-import aiofiles
-
+from agent.text_io import read_text_file
 from agent.tools.base import (
     BaseDeclarativeTool,
     BoundFileToolInvocation,
@@ -16,8 +15,6 @@ from agent.tools.base import (
 )
 from agent.tools.code_region import extract_editable_code
 from agent.workspace_docs import VirtualWorkspace
-
-_TEXT_FILE_ENCODING = "utf-8"
 
 
 class ReadFileParams(ToolParamsModel):
@@ -63,12 +60,7 @@ class ReadFileInvocation(BoundFileToolInvocation[ReadFileParams, str]):
             if resolved.content is not None:
                 full_code = resolved.content
             elif resolved.disk_path is not None:
-                async with aiofiles.open(
-                    resolved.disk_path,
-                    mode="r",
-                    encoding=_TEXT_FILE_ENCODING,
-                ) as f:
-                    full_code = await f.read()
+                full_code = await read_text_file(resolved.disk_path)
             else:
                 return ToolResult(error=f"Unable to resolve {self.params.path}")
 

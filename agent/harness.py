@@ -10,8 +10,6 @@ import time
 from pathlib import Path
 from typing import Any, Callable, Optional
 
-from rich.console import Console
-
 from agent.compiler import compile_urdf_report_maybe_timeout
 from agent.cost import CostTracker, pricing_for_provider_model
 from agent.defaults import resolve_max_turns
@@ -37,8 +35,10 @@ from agent.providers.factory import (
 )
 from agent.providers.gemini import GeminiLLM
 from agent.providers.openai import OpenAILLM
+from agent.providers.openai_api_surface import validate_openai_provider_options
 from agent.providers.openrouter import OpenRouterLLM
 from agent.runtime_limits import BatchRuntimeLimits, local_work_slot
+from agent.text_io import read_text_file, read_text_path, write_text_path
 from agent.tools import (
     build_first_turn_messages as _build_first_turn_messages,
 )
@@ -48,6 +48,7 @@ from agent.tools import (
 from agent.tools.base import ToolResult
 from agent.tools.code_region import extract_editable_code
 from agent.traces import TraceWriter
+from agent.tui.console_support import create_agent_console, ensure_utf8_stdio, tui_enabled_from_env
 from agent.tui.single_run import SingleRunDisplay
 from agent.workspace_docs import build_virtual_workspace
 from articraft.values import ProviderName
@@ -55,7 +56,8 @@ from sdk._profiles import get_sdk_profile
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
-CONSOLE = Console()
+ensure_utf8_stdio()
+CONSOLE = create_agent_console()
 _FIND_EXAMPLES_SKIPPED_CONTENT = "{Skipped: full content already returned earlier in this run.}"
 
 
@@ -67,7 +69,7 @@ def _minimal_scaffold_text(
     scaffold_path = repo_root / get_sdk_profile(sdk_package).scaffold_path
     if not scaffold_path.exists():
         raise FileNotFoundError(f"Missing scaffold source of truth: {scaffold_path}")
-    return scaffold_path.read_text(encoding="utf-8")
+    return read_text_path(scaffold_path)
 
 
 def _sha256_text(text: str) -> str:
@@ -185,6 +187,7 @@ class ArticraftAgent:
         provider: str = "openai",
         model_id: Optional[str] = None,
         openai_transport: str = "http",
+        openai_api: str = "responses",
         thinking_level: str = "high",
         max_turns: int | None = None,
         system_prompt_path: str = "designer_system_prompt.txt",
@@ -211,7 +214,16 @@ class ArticraftAgent:
         )
 
         provider_norm = normalize_provider_name(provider)
+        if provider_norm == ProviderName.OPENAI.value:
+            openai_api = validate_openai_provider_options(
+                provider=provider_norm,
+                openai_api=openai_api,
+                openai_transport=openai_transport,
+            )
         self.provider = provider_norm
+        self.openai_api = openai_api
+        self.openai_transport = openai_transport
+        self._prompt_cache_unverified_traced = False
         self.message_codec = MessageCodec(provider=self.provider)
         self.compile_feedback = CompileFeedbackLoop(
             file_path=self.file_path,
@@ -230,6 +242,7 @@ class ArticraftAgent:
                 model_id=model_id,
                 thinking_level=thinking_level,
                 openai_transport=openai_transport,
+                openai_api=openai_api,
                 openai_reasoning_summary=openai_reasoning_summary,
             ),
             constructors=ProviderConstructors(
@@ -246,19 +259,24 @@ class ArticraftAgent:
         self.max_cost_usd = max_cost_usd
         pricing = pricing_for_provider_model(provider_norm, actual_model_id)
         if pricing:
-            self.cost_tracker = CostTracker(model_id=actual_model_id, pricing=pricing)
+            self.cost_tracker = CostTracker(
+                model_id=actual_model_id,
+                pricing=pricing,
+                run_settings=self._build_cost_run_settings(actual_model_id),
+            )
 
         self.tool_registry = build_tool_registry(
             provider_norm,
             sdk_package=self.sdk_package,
             runtime_limits=self.runtime_limits,
+            openai_api=openai_api,
         )
         self.on_turn_start = on_turn_start
         self.on_compaction_event = on_compaction_event
         self.on_maintenance_event = on_maintenance_event
 
         if display_enabled is None:
-            display_enabled = os.environ.get("URDF_TUI_ENABLED", "1") != "0"
+            display_enabled = tui_enabled_from_env()
         self.display = SingleRunDisplay(
             console=CONSOLE,
             model_id=actual_model_id,
@@ -522,6 +540,19 @@ class ArticraftAgent:
             sdk_package=self.sdk_package,
         )
 
+    def _build_cost_run_settings(self, model_id: str) -> dict[str, Any]:
+        settings: dict[str, Any] = {
+            "provider": self.provider,
+            "model_id": model_id,
+        }
+        if self.provider == ProviderName.OPENAI.value:
+            from agent.providers.openai_api_surface import openai_compaction_mode
+
+            settings["openai_api"] = self.openai_api
+            settings["openai_transport"] = self.openai_transport
+            settings["compaction_mode"] = openai_compaction_mode(self.openai_api)
+        return settings
+
     def _persist_cost_tracking(self) -> None:
         if not self.cost_tracker:
             return
@@ -614,13 +645,13 @@ class ArticraftAgent:
     def _ensure_code_file(self) -> None:
         path = Path(self.file_path)
         if path.exists():
-            existing = path.read_text(encoding="utf-8")
+            existing = read_text_path(path)
             if existing.strip():
                 return
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(
+        write_text_path(
+            path,
             _minimal_scaffold_text(sdk_package=self.sdk_package),
-            encoding="utf-8",
         )
 
     def _seed_find_examples_cache_from_conversation(self, conversation: list[dict]) -> None:
@@ -786,7 +817,7 @@ class ArticraftAgent:
         if func_name == "replace":
             old_string_key = "old_string"
             try:
-                editable = extract_editable_code(Path(self.file_path).read_text(encoding="utf-8"))
+                editable = extract_editable_code(read_text_path(self.file_path))
             except Exception:
                 editable = None
             if (
@@ -950,10 +981,7 @@ class ArticraftAgent:
 
     async def _read_final_code(self) -> str | None:
         try:
-            import aiofiles
-
-            async with aiofiles.open(self.file_path, "r") as file:
-                return await file.read()
+            return await read_text_file(self.file_path)
         except Exception:
             return None
 
@@ -1194,6 +1222,24 @@ class ArticraftAgent:
 
             if usage:
                 llm_duration = time.monotonic() - llm_start
+                if (
+                    self.provider == ProviderName.OPENAI.value
+                    and getattr(self.llm, "api_surface", None) == "chat_completions"
+                    and getattr(self.llm, "prompt_cache_key", None)
+                    and turn >= 2
+                    and not self._prompt_cache_unverified_traced
+                    and not usage.get("cached_tokens")
+                ):
+                    self._prompt_cache_unverified_traced = True
+                    if self.trace_writer:
+                        self.trace_writer.write_event(
+                            "prompt_cache_unverified",
+                            {
+                                "model_id": self.llm.model_id,
+                                "openai_api": "chat_completions",
+                                "turn": turn,
+                            },
+                        )
                 turn_cost_usd = 0.0
                 if self.cost_tracker:
                     turn_cost = self.cost_tracker.add_turn(usage)

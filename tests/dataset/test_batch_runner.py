@@ -115,6 +115,7 @@ def test_resume_signature_and_mismatch_field() -> None:
         12,
         None,
         "sdk",
+        "",
     )
     assert batch_runner._resume_signature_mismatch_field(existing, row) is None
 
@@ -124,6 +125,10 @@ def test_resume_signature_and_mismatch_field() -> None:
     existing["model_id"] = "gpt-5.4"
     existing["max_cost_usd"] = 1.25
     assert batch_runner._resume_signature_mismatch_field(existing, row) == "max_cost_usd"
+
+    existing["max_cost_usd"] = None
+    existing["openai_api"] = "chat_completions"
+    assert batch_runner._resume_signature_mismatch_field(existing, row) == "openai_api"
 
 
 def test_batch_result_record_serialization_preserves_running_and_terminal_shapes(

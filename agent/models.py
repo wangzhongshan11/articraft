@@ -128,6 +128,7 @@ class PromptPreviewRequest:
     system_prompt_path: str
     sdk_package: str = "sdk"
     openai_transport: str = "http"
+    openai_api: str = "responses"
     openai_reasoning_summary: str | None = "auto"
 
 

@@ -250,6 +250,7 @@ def _single_run_settings_summary(
     system_prompt_path: str,
     sdk_package: str,
     openai_transport: str,
+    openai_api: str = "responses",
     openai_reasoning_summary: str | None,
     max_cost_usd: float | None,
 ) -> dict[str, Any]:
@@ -261,6 +262,7 @@ def _single_run_settings_summary(
         system_prompt_path=system_prompt_path,
         sdk_package=sdk_package,
         openai_transport=openai_transport,
+        openai_api=openai_api,
         openai_reasoning_summary=openai_reasoning_summary,
         max_cost_usd=max_cost_usd,
     ).to_summary()

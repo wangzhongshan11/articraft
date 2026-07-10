@@ -108,6 +108,12 @@ def _build_parser() -> argparse.ArgumentParser:
         help="OpenAI transport metadata to attach when provider=openai.",
     )
     init_record.add_argument(
+        "--openai-api",
+        default=None,
+        choices=["responses", "chat_completions"],
+        help="OpenAI API surface metadata to attach when provider=openai.",
+    )
+    init_record.add_argument(
         "--openai-reasoning-summary",
         default="auto",
         help="OpenAI reasoning summary metadata to attach when provider=openai.",
@@ -233,13 +239,21 @@ def main(argv: list[str] | None = None) -> int:
             print(str(exc))
             return 1
         try:
+            from agent.providers.openai_api_surface import resolve_openai_generation_options
+
+            openai_api, openai_transport = resolve_openai_generation_options(
+                provider=args.provider,
+                openai_api_cli=args.openai_api,
+                openai_transport=args.openai_transport,
+            )
             record_dir = create_workbench_draft_record(
                 repo_root=args.repo_root,
                 prompt_text=args.prompt,
                 image_path=image_path,
                 provider=args.provider,
                 model_id=args.model_id,
-                openai_transport=args.openai_transport,
+                openai_transport=openai_transport,
+                openai_api=openai_api,
                 thinking_level=args.thinking_level,
                 max_turns=args.max_turns,
                 max_cost_usd=max_cost_usd,

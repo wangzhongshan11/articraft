@@ -37,6 +37,7 @@ class ProviderConfig:
     model_id: str | None = None
     thinking_level: str = "high"
     openai_transport: str = "http"
+    openai_api: str = "responses"
     openai_reasoning_summary: str | None = "auto"
     openai_prompt_cache_key: str | None = None
     openai_prompt_cache_retention: str | None = None
@@ -111,6 +112,7 @@ def create_provider_client(
             thinking_level=config.thinking_level,
             reasoning_summary=config.openai_reasoning_summary,
             transport=config.openai_transport,
+            api_surface=config.openai_api,
             prompt_cache_key=config.openai_prompt_cache_key,
             prompt_cache_retention=config.openai_prompt_cache_retention,
             dry_run=dry_run,

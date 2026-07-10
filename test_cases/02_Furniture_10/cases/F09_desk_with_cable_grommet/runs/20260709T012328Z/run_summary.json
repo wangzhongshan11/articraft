@@ -1,0 +1,23 @@
+{
+  "case_id": "F09",
+  "suite": "02_Furniture_10",
+  "case_dir": "test_cases/02_Furniture_10/cases/F09_desk_with_cable_grommet",
+  "prompt_file": "cases/F09_desk_with_cable_grommet/prompt_en.txt",
+  "reference_image": "test_cases/02_Furniture_10/cases/F09_desk_with_cable_grommet/reference_F09_desk_with_cable_grommet.png",
+  "image_used": "test_cases/02_Furniture_10/cases/F09_desk_with_cable_grommet/reference_F09_desk_with_cable_grommet.png",
+  "run_id": "case_f09_20260709t012328z",
+  "record_id": "bench_f09_20260709t012328z",
+  "status": "success",
+  "message": null,
+  "artifact_dir": "test_cases/02_Furniture_10/cases/F09_desk_with_cable_grommet/runs/20260709T012328Z",
+  "provider": "openai",
+  "model_id": "gpt-5.5",
+  "thinking_level": "med",
+  "turn_count": 14,
+  "tool_call_count": 15,
+  "compile_attempt_count": 3,
+  "total_cost_usd": 0.695971,
+  "compile_target": "visual",
+  "compile_error": null,
+  "compile_warnings": []
+}

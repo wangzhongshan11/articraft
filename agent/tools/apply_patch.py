@@ -6,8 +6,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-import aiofiles
-
+from agent.text_io import read_text_file, write_text_file
 from agent.tools.base import (
     BaseDeclarativeTool,
     BoundFileToolInvocation,
@@ -66,15 +65,13 @@ class ApplyPatchInvocation(BoundFileToolInvocation[ApplyPatchParams, str]):
             if not self.params.input.strip():
                 return ToolResult(error="input cannot be empty")
 
-            async with aiofiles.open(self.file_path, mode="r") as f:
-                full_code = await f.read()
+            full_code = await read_text_file(self.file_path)
 
             hunks = _parse_patch(self.params.input)
             new_code = _apply_hunks(full_code, hunks)
             validation = self._validate_python_syntax(new_code, self.file_path)
 
-            async with aiofiles.open(self.file_path, mode="w") as f:
-                await f.write(new_code)
+            await write_text_file(self.file_path, new_code)
 
             return ToolResult(
                 output=f"Patch applied successfully ({len(hunks)} hunks)", compilation=validation

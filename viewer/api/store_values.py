@@ -78,6 +78,15 @@ def _thinking_level_from_provenance(provenance: Any) -> str | None:
     return _coerce_string(generation.get("thinking_level"))
 
 
+def _openai_api_from_provenance(provenance: Any) -> str | None:
+    if not isinstance(provenance, dict):
+        return None
+    generation = provenance.get("generation")
+    if not isinstance(generation, dict):
+        return None
+    return _coerce_string(generation.get("openai_api"))
+
+
 def _cost_totals(cost: Any) -> tuple[float | None, int | None, int | None]:
     if not isinstance(cost, dict):
         return None, None, None

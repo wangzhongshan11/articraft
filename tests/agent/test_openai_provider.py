@@ -12,7 +12,7 @@ from agent.providers.openai import (
     DEFAULT_OPENAI_MODEL,
     OpenAILLM,
     _load_cwd_dotenv_override,
-    _OpenAIWebSocketError,
+    OpenAIWebSocketError,
     openai_api_key_from_env,
     openai_api_keys_from_env,
 )
@@ -191,7 +191,7 @@ def test_request_with_websocket_logs_full_context_fallback(
     ) -> dict:
         calls.append((request_payload, force_reconnect))
         if len(calls) == 1:
-            raise _OpenAIWebSocketError(
+            raise OpenAIWebSocketError(
                 code="previous_response_not_found",
                 message="missing prior response",
             )
@@ -359,7 +359,7 @@ def test_openai_default_model_is_latest_snapshot() -> None:
     provider = OpenAILLM(dry_run=True)
 
     assert DEFAULT_OPENAI_MODEL == "gpt-5.5"
-    assert provider.model_id == "gpt-5.4"
+    assert provider.model_id == DEFAULT_OPENAI_MODEL
 
 
 def test_openai_default_compaction_model_matches_main_model() -> None:

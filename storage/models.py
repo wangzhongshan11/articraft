@@ -131,6 +131,7 @@ class GenerationSettings:
     model_id: str | None
     thinking_level: str | None
     openai_transport: str | None = None
+    openai_api: str | None = None
     openai_reasoning_summary: str | None = None
     max_turns: int | None = None
     max_cost_usd: float | None = None

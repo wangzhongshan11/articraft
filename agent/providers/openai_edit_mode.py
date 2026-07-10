@@ -4,11 +4,16 @@ OpenAI edit-tool mode selection.
 Official OpenAI Responses API supports Codex-style ``apply_patch`` custom tools.
 Many OpenAI-compatible proxies (OneAPI, etc.) only reliably support standard
 ``type: function`` tool calls — the same shape CAD runtime and Gemini use.
+
+Chat Completions always requires function edit tools; ``apply_patch`` is
+Responses-only.
 """
 
 from __future__ import annotations
 
 import os
+
+_CHAT_COMPLETIONS_SURFACE = "chat_completions"
 
 
 def openai_use_function_edit_tools(env: dict[str, str] | None = None) -> bool:
@@ -33,3 +38,20 @@ def openai_use_function_edit_tools(env: dict[str, str] | None = None) -> bool:
     if not base_url:
         return False
     return "api.openai.com" not in base_url
+
+
+def validate_openai_chat_edit_tools(
+    openai_api: str,
+    *,
+    env: dict[str, str] | None = None,
+) -> None:
+    normalized = (openai_api or "").strip().lower()
+    if normalized not in {_CHAT_COMPLETIONS_SURFACE, "chat", "completions", "chat-completions"}:
+        return
+    if openai_use_function_edit_tools(env):
+        return
+    raise ValueError(
+        "openai_api=chat_completions requires function edit tools (replace/write_file). "
+        "Set ARTICRAFT_OPENAI_FUNCTION_EDIT_TOOLS=true or use auto with a non-official "
+        "OPENAI_BASE_URL."
+    )

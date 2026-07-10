@@ -7,6 +7,7 @@ from typing import Optional
 from rich.console import Console
 from rich.text import Text
 
+from agent.tui.console_support import failure_marker, rule_separator, success_marker
 from agent.tui.formatters import format_cost, format_duration, format_tokens, truncate_text
 
 
@@ -80,7 +81,7 @@ class BatchRunDisplay:
     def _print_progress_rule(self):
         rule = Text()
         rule.append(f"Batch {self.completed}/{self.total_runs}", style="bold cyan")
-        rule.append(" " + "─" * 40, style="dim")
+        rule.append(" " + rule_separator(40, stream=self.console.file), style="dim")
         self.console.print(rule)
 
     def _print_checkpoint(self):
@@ -419,9 +420,9 @@ class BatchRunDisplay:
         line.append(truncate_text(slug, 50), style="bold")
         line.append(self._metadata_text(slug), style="dim")
         if success:
-            line.append(" ✓", style="green")
+            line.append(f" {success_marker(stream=self.console.file)}", style="green")
         else:
-            line.append(" ✗", style="red")
+            line.append(f" {failure_marker(stream=self.console.file)}", style="red")
         if last_turn > 0:
             line.append("  t=", style="dim")
             line.append(f"{last_turn}", style="bold yellow")

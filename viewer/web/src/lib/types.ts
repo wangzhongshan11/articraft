@@ -14,6 +14,7 @@ export type RecordSummary = {
   sdk_package: string | null;
   provider: string | null;
   model_id: string | null;
+  openai_api: string | null;
   creator_mode: string | null;
   external_agent: string | null;
   agent_harness: AgentHarness;

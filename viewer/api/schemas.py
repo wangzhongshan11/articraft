@@ -51,6 +51,7 @@ class RecordSummaryResponse(BaseModel):
     sdk_package: str | None = None
     provider: str | None = None
     model_id: str | None = None
+    openai_api: str | None = None
     creator_mode: str | None = None
     external_agent: str | None = None
     agent_harness: str = "articraft"

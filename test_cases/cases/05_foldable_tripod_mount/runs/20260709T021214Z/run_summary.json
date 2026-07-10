@@ -1,0 +1,22 @@
+{
+  "case_id": "05_foldable_tripod_mount",
+  "suite": "cases",
+  "case_dir": "test_cases/cases/05_foldable_tripod_mount",
+  "prompt_file": "prompt_zh.md",
+  "reference_image": "test_cases/cases/05_foldable_tripod_mount/05.png",
+  "image_used": "test_cases/cases/05_foldable_tripod_mount/05.png",
+  "run_id": "case_05_foldable_tripod_mount_20260709t021214z",
+  "record_id": "bench_05_foldable_tripod_mount_20260709t021214z",
+  "status": "failed",
+  "message": "Runtime error: 'utf-8' codec can't decode byte 0xd7 in position 3990: invalid continuation byte",
+  "artifact_dir": "test_cases/cases/05_foldable_tripod_mount/runs/20260709T021214Z",
+  "provider": "openai",
+  "model_id": "gpt-5.5",
+  "thinking_level": "med",
+  "turn_count": null,
+  "tool_call_count": null,
+  "compile_attempt_count": null,
+  "total_cost_usd": null,
+  "compile_target": "visual",
+  "compile_error": null
+}

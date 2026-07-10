@@ -11,6 +11,7 @@ from typing import Callable, Optional
 from agent.cost import max_cost_usd_from_env
 from agent.defaults import resolve_max_turns
 from agent.prompts import DESIGNER_PROMPT_NAME, normalize_sdk_package
+from agent.providers.openai_api_surface import resolve_openai_api_from_provenance
 from agent.record_persistence import (
     _load_workbench_entry,
     _normalize_collection_names,
@@ -114,6 +115,7 @@ async def rerun_record_in_place(
     provider = _first_string(generation.get("provider"), existing_record.get("provider"))
     stored_model_id = _optional_string(generation.get("model_id"))
     openai_transport = _first_string(generation.get("openai_transport"), "http")
+    openai_api = resolve_openai_api_from_provenance(generation)
     stored_thinking_level = _first_string(
         _thinking_level_from_run_parameters(
             storage_repo,
@@ -217,6 +219,7 @@ async def rerun_record_in_place(
         provider=provider,
         model_id=model_id,
         openai_transport=openai_transport,
+        openai_api=openai_api,
         thinking_level=thinking_level,
         max_turns=max_turns,
         system_prompt_path=system_prompt_path,

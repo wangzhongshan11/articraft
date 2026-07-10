@@ -19,6 +19,10 @@ from agent.payload_preview import build_provider_payload_preview
 from agent.prompts import normalize_sdk_package
 from agent.providers.factory import validate_provider_credentials
 from agent.providers.openai import DEFAULT_OPENAI_MODEL
+from agent.providers.openai_api_surface import (
+    resolve_openai_api_surface,
+    validate_openai_provider_options,
+)
 from agent.run_context import _default_model_id
 from agent.single_run import run_from_input
 from agent.tools import build_initial_user_content as _build_initial_user_content
@@ -127,6 +131,12 @@ def main(
         ),
     )
     parser.add_argument(
+        "--openai-api",
+        default=None,
+        choices=["responses", "chat_completions"],
+        help="OpenAI API surface for --provider openai. Defaults to responses.",
+    )
+    parser.add_argument(
         "--thinking",
         default=DEFAULT_THINKING_LEVEL,
         choices=THINKING_LEVEL_VALUES,
@@ -195,6 +205,17 @@ def main(
 
     openai_reasoning_summary = "auto"
 
+    try:
+        openai_api = validate_openai_provider_options(
+            provider=args.provider,
+            openai_api=resolve_openai_api_surface(cli_value=args.openai_api),
+            openai_transport=args.openai_transport,
+            cli_openai_api=args.openai_api,
+        )
+    except ValueError as exc:
+        print(str(exc), file=sys.stderr)
+        return 1
+
     if args.provider != ProviderName.OPENAI.value and args.openai_transport != "http":
         print("--openai-transport is only supported for --provider openai.", file=sys.stderr)
         return 1
@@ -229,6 +250,7 @@ def main(
             provider=args.provider,
             model_id=model_id,
             openai_transport=args.openai_transport,
+            openai_api=openai_api,
             thinking_level=args.thinking,
             system_prompt_path=args.system_prompt,
             sdk_package=sdk_package,
@@ -261,6 +283,7 @@ def main(
             provider=args.provider,
             model_id=args.model,
             openai_transport=args.openai_transport,
+            openai_api=openai_api,
             thinking_level=args.thinking,
             max_turns=args.max_turns,
             system_prompt_path=args.system_prompt,

@@ -27,6 +27,7 @@ def build_provider_payload_preview(
     provider: str,
     model_id: str,
     openai_transport: str = "http",
+    openai_api: str = "responses",
     thinking_level: str,
     system_prompt_path: str,
     sdk_package: str = "sdk",
@@ -51,7 +52,11 @@ def build_provider_payload_preview(
         sdk_docs_context=docs,
         provider=provider,
     )
-    tools = tool_registry_builder(provider, sdk_package=sdk_package).get_tool_schemas()
+    tools = tool_registry_builder(
+        provider,
+        sdk_package=sdk_package,
+        openai_api=openai_api,
+    ).get_tool_schemas()
 
     provider_norm = normalize_provider_name(provider)
     prompt_cache_key: str | None = None
@@ -70,6 +75,7 @@ def build_provider_payload_preview(
             model_id=model_id,
             thinking_level=thinking_level,
             openai_transport=openai_transport,
+            openai_api=openai_api,
             openai_reasoning_summary=openai_reasoning_summary,
             openai_prompt_cache_key=prompt_cache_key,
             openai_prompt_cache_retention=prompt_cache_retention,

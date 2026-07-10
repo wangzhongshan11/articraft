@@ -15,6 +15,7 @@ class SingleRunSettings:
     system_prompt_path: str
     sdk_package: str
     openai_transport: str = "http"
+    openai_api: str = "responses"
     openai_reasoning_summary: str | None = "auto"
     max_cost_usd: float | None = None
 
@@ -29,6 +30,7 @@ class SingleRunSettings:
             "sdk_package": self.sdk_package,
         }
         if normalize_provider_name(self.provider) is ProviderName.OPENAI:
+            summary["openai_api"] = self.openai_api
             summary["openai_transport"] = self.openai_transport
             summary["openai_reasoning_summary"] = self.openai_reasoning_summary
         return summary

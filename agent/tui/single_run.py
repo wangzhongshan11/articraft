@@ -8,6 +8,7 @@ from typing import Any, Optional
 from rich.console import Console
 from rich.text import Text
 
+from agent.tui.console_support import failure_marker, rule_separator, success_marker
 from agent.tui.formatters import (
     format_context_pressure,
     format_cost,
@@ -282,7 +283,7 @@ class SingleRunDisplay:
         self.console.print()
         rule = Text()
         rule.append(f"Turn {turn_number}/{self.max_turns}", style="bold")
-        rule.append(" " + "─" * 40, style="dim")
+        rule.append(" " + rule_separator(40, stream=self.console.file), style="dim")
         self.console.print(rule)
 
     def end_turn(self, success: bool, error: Optional[str] = None):
@@ -443,9 +444,9 @@ class SingleRunDisplay:
         line.append(tool_name, style="bold")
 
         if success:
-            line.append(" ✓", style="green")
+            line.append(f" {success_marker(stream=self.console.file)}", style="green")
         else:
-            line.append(" ✗", style="red")
+            line.append(f" {failure_marker(stream=self.console.file)}", style="red")
 
         line.append(f" {format_duration(duration)}", style="dim")
         self.console.print(line)
@@ -504,9 +505,9 @@ class SingleRunDisplay:
         line = Text()
         line.append("  compile ", style="blue")
         if success:
-            line.append("✓", style="green")
+            line.append(success_marker(stream=self.console.file), style="green")
         else:
-            line.append("✗", style="red")
+            line.append(failure_marker(stream=self.console.file), style="red")
         line.append(f" {format_duration(duration)}", style="dim")
         self.console.print(line)
 

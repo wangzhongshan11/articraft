@@ -132,6 +132,7 @@ Recommended/optional columns:
 - `max_cost_usd` - Optional per-row budget; blank rows inherit the batch CLI flag or `ARTICRAFT_MAX_COST_USD`.
 - `label` - Free-form tracking label.
 - `sdk_package` - Optional SDK package override; defaults to `sdk`.
+- `openai_api` - OpenAI rows only (`responses` or `chat_completions`); blank inherits env or `responses`.
 
 Validation rules:
 

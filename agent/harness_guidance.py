@@ -4,9 +4,9 @@ import ast
 import hashlib
 import json
 from dataclasses import dataclass
-from pathlib import Path
 from typing import Callable
 
+from agent.text_io import read_text_path
 from agent.tools.base import ToolResult
 
 MUTATING_TOOL_NAMES = frozenset({"apply_patch", "replace", "write_file"})
@@ -135,8 +135,8 @@ class GuidanceInjector:
 
     def _scan_current_code_contracts(self) -> CodeContractScan | None:
         try:
-            text = Path(self.file_path).read_text(encoding="utf-8")
-        except OSError:
+            text = read_text_path(self.file_path)
+        except (OSError, UnicodeDecodeError):
             return None
         return scan_code_contracts(text)
 

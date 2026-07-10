@@ -1,0 +1,23 @@
+{
+  "case_id": "10_hinged_waffle_press",
+  "suite": "cases",
+  "case_dir": "test_cases/cases/10_hinged_waffle_press",
+  "prompt_file": "prompt_zh.md",
+  "reference_image": "test_cases/cases/10_hinged_waffle_press/10.png",
+  "image_used": "test_cases/cases/10_hinged_waffle_press/10.png",
+  "run_id": "case_10_hinged_waffle_press_20260709t032209z",
+  "record_id": "bench_10_hinged_waffle_press_20260709t032209z",
+  "status": "success",
+  "message": null,
+  "artifact_dir": "test_cases/cases/10_hinged_waffle_press/runs/20260709T032209Z",
+  "provider": "openai",
+  "model_id": "gpt-5.5",
+  "thinking_level": "med",
+  "turn_count": 23,
+  "tool_call_count": 25,
+  "compile_attempt_count": 4,
+  "total_cost_usd": 1.250599,
+  "compile_target": "visual",
+  "compile_error": null,
+  "compile_warnings": []
+}

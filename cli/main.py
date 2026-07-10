@@ -12,7 +12,8 @@ from shutil import which
 from agent import runner as agent_runner
 from agent.providers.factory import infer_provider_from_model_id
 from agent.providers.openai import DEFAULT_OPENAI_MODEL
-from articraft.values import PROVIDER_VALUES, THINKING_LEVEL_VALUES, DEFAULT_THINKING_LEVEL
+from agent.providers.openai_api_surface import resolve_openai_generation_options
+from articraft.values import DEFAULT_THINKING_LEVEL, PROVIDER_VALUES, THINKING_LEVEL_VALUES
 from cli import compile_all as compile_all_cli
 from cli import compile_record as compile_record_cli
 from cli import dataset as dataset_cli
@@ -86,24 +87,40 @@ def _run_status(args: argparse.Namespace) -> int:
     return _workbench(args, ["status"])
 
 
+def _append_openai_surface_argv(argv: list[str], args: argparse.Namespace, *, provider: str) -> None:
+    if provider != "openai":
+        if getattr(args, "openai_transport", "http") != "http":
+            raise ValueError("--openai-transport is only supported for --provider openai.")
+        if getattr(args, "openai_api", None) is not None:
+            raise ValueError("--openai-api is only supported for --provider openai.")
+        return
+    openai_api, openai_transport = resolve_openai_generation_options(
+        provider=provider,
+        openai_api_cli=getattr(args, "openai_api", None),
+        openai_transport=getattr(args, "openai_transport", "http"),
+    )
+    argv.extend(["--openai-api", openai_api, "--openai-transport", openai_transport])
+
+
 def _run_generate(args: argparse.Namespace) -> int:
     try:
         model_id, provider = _model_and_provider(args)
+        argv = [
+            "--repo-root",
+            str(args.repo_root),
+            "--prompt",
+            args.prompt,
+            "--provider",
+            provider,
+            "--model",
+            model_id,
+            "--thinking",
+            args.thinking_level,
+        ]
+        _append_openai_surface_argv(argv, args, provider=provider)
     except ValueError as exc:
         print(str(exc))
         return 1
-    argv = [
-        "--repo-root",
-        str(args.repo_root),
-        "--prompt",
-        args.prompt,
-        "--provider",
-        provider,
-        "--model",
-        model_id,
-        "--thinking",
-        args.thinking_level,
-    ]
     if args.image:
         argv.extend(["--image", args.image])
     if args.max_cost_usd is not None:
@@ -114,19 +131,20 @@ def _run_generate(args: argparse.Namespace) -> int:
 def _run_draft(args: argparse.Namespace) -> int:
     try:
         model_id, provider = _model_and_provider(args)
+        argv = [
+            "init-record",
+            args.prompt,
+            "--provider",
+            provider,
+            "--model-id",
+            model_id,
+            "--thinking-level",
+            args.thinking_level,
+        ]
+        _append_openai_surface_argv(argv, args, provider=provider)
     except ValueError as exc:
         print(str(exc))
         return 1
-    argv = [
-        "init-record",
-        args.prompt,
-        "--provider",
-        provider,
-        "--model-id",
-        model_id,
-        "--thinking-level",
-        args.thinking_level,
-    ]
     if args.image:
         argv.extend(["--image", args.image])
     if args.max_cost_usd is not None:
@@ -385,21 +403,22 @@ def _run_dataset_batch_new(args: argparse.Namespace) -> int:
 def _run_dataset_run(args: argparse.Namespace) -> int:
     try:
         model_id, provider = _model_and_provider(args)
+        argv = [
+            "run-single",
+            args.prompt,
+            "--category-slug",
+            args.category_slug,
+            "--provider",
+            provider,
+            "--model-id",
+            model_id,
+            "--thinking-level",
+            args.thinking_level,
+        ]
+        _append_openai_surface_argv(argv, args, provider=provider)
     except ValueError as exc:
         print(str(exc))
         return 1
-    argv = [
-        "run-single",
-        args.prompt,
-        "--category-slug",
-        args.category_slug,
-        "--provider",
-        provider,
-        "--model-id",
-        model_id,
-        "--thinking-level",
-        args.thinking_level,
-    ]
     if args.image:
         argv.extend(["--image", args.image])
     if args.dataset_id:
@@ -579,6 +598,18 @@ def _add_repo_root(parser: argparse.ArgumentParser) -> None:
 def _add_generation_options(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--provider", choices=PROVIDER_VALUES)
     parser.add_argument("--model", default=DEFAULT_MODEL, help="Model ID to use.")
+    parser.add_argument(
+        "--openai-transport",
+        default="http",
+        choices=["http", "websocket"],
+        help="Transport for --provider openai.",
+    )
+    parser.add_argument(
+        "--openai-api",
+        default=None,
+        choices=["responses", "chat_completions"],
+        help="OpenAI API surface for --provider openai. Defaults to responses.",
+    )
     parser.add_argument(
         "--thinking-level",
         "--thinking",

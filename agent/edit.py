@@ -13,6 +13,7 @@ from typing import Any, Callable, Optional
 from agent.cost import max_cost_usd_from_env
 from agent.defaults import resolve_max_turns
 from agent.prompts import DESIGNER_PROMPT_NAME, normalize_sdk_package
+from agent.providers.openai_api_surface import resolve_openai_api_from_provenance
 from agent.record_persistence import _load_workbench_entry, _normalize_collection_names
 from agent.run_context import (
     RunExecutionOutcome,
@@ -277,6 +278,7 @@ async def edit_record(
     )
     stored_model_id = _optional_string(generation.get("model_id"))
     stored_openai_transport = _first_string(generation.get("openai_transport"), "http")
+    stored_openai_api = resolve_openai_api_from_provenance(generation)
     stored_thinking_level = _first_string(generation.get("thinking_level"), "high")
     stored_max_turns = generation.get("max_turns")
     openai_reasoning_summary = (
@@ -473,6 +475,7 @@ async def edit_record(
         provider=selected_provider,
         model_id=selected_model_override,
         openai_transport=stored_openai_transport,
+        openai_api=stored_openai_api,
         thinking_level=selected_thinking,
         max_turns=resolved_max_turns,
         system_prompt_path=system_prompt_path,

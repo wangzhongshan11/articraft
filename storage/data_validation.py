@@ -44,6 +44,7 @@ _BATCH_KNOWN_COLUMNS = {
     "label",
     "max_cost_usd",
     "scaffold_mode",
+    "openai_api",
 }
 
 
@@ -325,6 +326,22 @@ class _DataFormatValidator:
             provider = normalized_row.get("provider", "").lower()
             if provider and provider not in _ALLOWED_PROVIDERS:
                 self._add_error(path, f"row {row_number} has invalid provider={provider!r}")
+            openai_api = normalized_row.get("openai_api", "")
+            if openai_api:
+                if provider != "openai":
+                    self._add_error(
+                        path,
+                        f"row {row_number} openai_api is only valid for provider openai",
+                    )
+                else:
+                    try:
+                        from agent.providers.openai_api_surface import normalize_openai_api_surface
+
+                        normalize_openai_api_surface(openai_api)
+                    except ValueError:
+                        self._add_error(
+                            path, f"row {row_number} has invalid openai_api={openai_api!r}"
+                        )
             thinking_level = normalized_row.get("thinking_level", "").lower()
             if thinking_level and thinking_level not in _ALLOWED_THINKING_LEVELS:
                 self._add_error(

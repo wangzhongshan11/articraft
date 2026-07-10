@@ -1194,6 +1194,12 @@ export function InspectPanel({
                 <span className="prop-label">Model</span>
                 <span className="prop-value font-mono text-[10px]">{record.model_id || "--"}</span>
               </div>
+              {record.provider === "openai" && record.openai_api ? (
+                <div className="prop-row">
+                  <span className="prop-label">OpenAI API</span>
+                  <span className="prop-value font-mono text-[10px]">{record.openai_api}</span>
+                </div>
+              ) : null}
               <div className="prop-row">
                 <span className="prop-label">Thinking</span>
                 <span className="prop-value">{record.thinking_level || "--"}</span>

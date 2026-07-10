@@ -1,0 +1,23 @@
+{
+  "case_id": "07_compound_pliers",
+  "suite": "cases",
+  "case_dir": "test_cases/cases/07_compound_pliers",
+  "prompt_file": "prompt_zh.md",
+  "reference_image": "test_cases/cases/07_compound_pliers/07.png",
+  "image_used": "test_cases/cases/07_compound_pliers/07.png",
+  "run_id": "case_07_compound_pliers_20260709t024842z",
+  "record_id": "bench_07_compound_pliers_20260709t024842z",
+  "status": "success",
+  "message": null,
+  "artifact_dir": "test_cases/cases/07_compound_pliers/runs/20260709T024842Z",
+  "provider": "openai",
+  "model_id": "gpt-5.5",
+  "thinking_level": "med",
+  "turn_count": 31,
+  "tool_call_count": 33,
+  "compile_attempt_count": 6,
+  "total_cost_usd": 1.407952,
+  "compile_target": "visual",
+  "compile_error": null,
+  "compile_warnings": []
+}

@@ -333,6 +333,7 @@ class SuccessRecordWrite:
     provider: str
     model_id: str
     openai_transport: str
+    openai_api: str
     thinking_level: str
     max_turns: int
     system_prompt_path: Path
@@ -373,6 +374,7 @@ def create_workbench_draft_record(
     provider: str = "openai",
     model_id: str | None = None,
     openai_transport: str = "http",
+    openai_api: str | None = None,
     thinking_level: str = "high",
     max_turns: int | None = None,
     system_prompt_path: str = "designer_system_prompt.txt",
@@ -410,22 +412,33 @@ def create_workbench_draft_record(
         selected_model_id = model_id
         selected_thinking_level = thinking_level
         selected_openai_transport = None
+        selected_openai_api = None
         selected_openai_reasoning_summary = None
         resolved_max_turns = max_turns
         system_prompt_file = "EXTERNAL_AGENT_DATA.md"
         system_prompt_sha = None
     else:
+        from agent.providers.openai_api_surface import resolve_openai_generation_options
+
         selected_provider = provider
+        resolved_openai_api, resolved_openai_transport = resolve_openai_generation_options(
+            provider=provider,
+            openai_api_cli=openai_api,
+            openai_transport=openai_transport,
+        )
         selected_model_id = _default_model_id(
             provider=provider,
             model_id=model_id,
             thinking_level=thinking_level,
-            openai_transport=openai_transport,
+            openai_transport=resolved_openai_transport,
             openai_reasoning_summary=openai_reasoning_summary,
         )
         selected_thinking_level = thinking_level
         selected_openai_transport = (
-            openai_transport if selected_provider == ProviderName.OPENAI.value else None
+            resolved_openai_transport if selected_provider == ProviderName.OPENAI.value else None
+        )
+        selected_openai_api = (
+            resolved_openai_api if selected_provider == ProviderName.OPENAI.value else None
         )
         selected_openai_reasoning_summary = (
             openai_reasoning_summary if selected_provider == ProviderName.OPENAI.value else None
@@ -462,6 +475,7 @@ def create_workbench_draft_record(
             model_id=selected_model_id,
             thinking_level=selected_thinking_level,
             openai_transport=selected_openai_transport,
+            openai_api=selected_openai_api,
             openai_reasoning_summary=selected_openai_reasoning_summary,
             max_turns=resolved_max_turns,
             max_cost_usd=max_cost_usd,
@@ -499,6 +513,7 @@ def create_workbench_draft_record(
         model_id=selected_model_id,
         thinking_level=selected_thinking_level,
         openai_transport=selected_openai_transport,
+        openai_api=selected_openai_api,
         openai_reasoning_summary=selected_openai_reasoning_summary,
         max_turns=resolved_max_turns,
         max_cost_usd=max_cost_usd,
@@ -605,6 +620,7 @@ def write_success_record(
     provider = request.provider
     model_id = request.model_id
     openai_transport = request.openai_transport
+    openai_api = request.openai_api
     thinking_level = request.thinking_level
     max_turns = request.max_turns
     system_prompt_path = request.system_prompt_path
@@ -734,6 +750,7 @@ def write_success_record(
             model_id=model_id,
             thinking_level=thinking_level,
             openai_transport=openai_transport if provider == ProviderName.OPENAI.value else None,
+            openai_api=openai_api if provider == ProviderName.OPENAI.value else None,
             openai_reasoning_summary=(
                 openai_reasoning_summary if provider == ProviderName.OPENAI.value else None
             ),
@@ -776,6 +793,7 @@ def write_success_record(
         model_id=model_id,
         thinking_level=thinking_level,
         openai_transport=openai_transport if provider == ProviderName.OPENAI.value else None,
+        openai_api=openai_api if provider == ProviderName.OPENAI.value else None,
         openai_reasoning_summary=(
             openai_reasoning_summary if provider == ProviderName.OPENAI.value else None
         ),

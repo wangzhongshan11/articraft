@@ -68,10 +68,17 @@ def build_tool_registry(
     *,
     sdk_package: str = "sdk",
     runtime_limits: BatchRuntimeLimits | None = None,
+    openai_api: str = "responses",
 ) -> ToolRegistry:
     provider_norm = normalize_provider_name(provider)
     package = normalize_sdk_package(sdk_package)
-    if provider_norm is ProviderName.OPENAI and not openai_use_function_edit_tools():
+    use_function_edit_tools = openai_use_function_edit_tools()
+    if provider_norm is ProviderName.OPENAI:
+        from agent.providers.openai_api_surface import normalize_openai_api_surface
+
+        if normalize_openai_api_surface(openai_api) == "chat_completions":
+            use_function_edit_tools = True
+    if provider_norm is ProviderName.OPENAI and not use_function_edit_tools:
         tools: list[BaseDeclarativeTool] = [
             ReadFileTool(),
             ApplyPatchFreeformTool(),

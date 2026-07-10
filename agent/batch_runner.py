@@ -16,10 +16,12 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable, Iterator, Literal
 
-from rich.console import Console
-
 from agent.cost import max_cost_usd_from_env, parse_max_cost_usd
 from agent.open_file_limits import open_file_worker_cap
+from agent.providers.openai_api_surface import (
+    normalize_openai_api_surface,
+    resolve_openai_api_surface,
+)
 from agent.runner import (
     _build_prompt_with_qc,
     _build_single_run_context,
@@ -30,6 +32,7 @@ from agent.runner import (
 from agent.runtime_limits import BatchRuntimeLimits
 from agent.tools import build_initial_user_content
 from agent.tui.batch_run import BatchRunDisplay
+from agent.tui.console_support import create_agent_console, ensure_utf8_stdio, tui_enabled_from_env
 from articraft.values import (
     PROVIDER_VALUE_SET,
     THINKING_LEVEL_VALUE_SET,
@@ -55,7 +58,8 @@ from storage.search import SearchIndex
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
-CONSOLE = Console()
+ensure_utf8_stdio()
+CONSOLE = create_agent_console()
 
 BatchRowStatus = Literal["pending", "running", "success", "failed"]
 ResumePolicy = Literal["failed_or_pending", "failed_only", "all"]
@@ -78,6 +82,7 @@ _SUPPORTED_HEADERS = {
     "sdk_package",
     "label",
     "max_cost_usd",
+    "openai_api",
 }
 _REQUIRED_HEADERS = {
     "category_slug",
@@ -493,8 +498,9 @@ class BatchRowSpec:
     max_cost_usd: float | None
     sdk_package: str
     label: str | None = None
+    openai_api: str | None = None
 
-    def resume_signature(self) -> tuple[str, str, str, str, str, int, float | None, str]:
+    def resume_signature(self) -> tuple[str, str, str, str, str, int, float | None, str, str]:
         return (
             self.category_slug,
             self.prompt,
@@ -504,6 +510,7 @@ class BatchRowSpec:
             self.max_turns,
             self.max_cost_usd,
             self.sdk_package,
+            self.openai_api or "",
         )
 
 
@@ -606,6 +613,20 @@ def _resolve_category_title(
     return category_title
 
 
+def _resolve_row_openai_api(provider: str, raw_value: str | None, *, row_index: int) -> str | None:
+    raw = (raw_value or "").strip()
+    if provider != "openai":
+        if raw:
+            raise ValueError(
+                f"Row {row_index} openai_api is only supported for provider openai "
+                f"(got provider={provider!r})"
+            )
+        return None
+    if raw:
+        return normalize_openai_api_surface(raw)
+    return resolve_openai_api_surface()
+
+
 def _parse_batch_row(
     raw_row: dict[str, str],
     *,
@@ -624,6 +645,11 @@ def _parse_batch_row(
     sdk_package = raw_row.get("sdk_package", "sdk")
     category_title = raw_row.get("category_title") or None
     label = raw_row.get("label") or None
+    openai_api = _resolve_row_openai_api(
+        provider,
+        raw_row.get("openai_api"),
+        row_index=row_index,
+    )
 
     if not category_slug:
         raise ValueError(f"Row {row_index} is missing category_slug")
@@ -669,6 +695,7 @@ def _parse_batch_row(
         max_cost_usd=max_cost_usd,
         sdk_package=sdk_package,
         label=label,
+        openai_api=openai_api,
     )
 
 
@@ -862,6 +889,11 @@ def _resume_signature_mismatch_field(existing: dict[str, Any], row: BatchRowSpec
             "max_cost_usd",
             _resume_signature_text(existing.get("max_cost_usd")),
             _resume_signature_text(row.max_cost_usd),
+        ),
+        (
+            "openai_api",
+            _resume_signature_text(existing.get("openai_api")),
+            _resume_signature_text(row.openai_api),
         ),
     )
     for field_name, existing_value, row_value in comparable_values:
@@ -1257,6 +1289,7 @@ async def _run_batch_row(
         provider=row.provider,
         model_id=row.model_id,
         openai_transport="http",
+        openai_api=row.openai_api if row.provider == "openai" else "responses",
         thinking_level=row.thinking_level,
         max_turns=row.max_turns,
         system_prompt_path=config.system_prompt_path,
@@ -1665,7 +1698,7 @@ async def run_dataset_batch(config: BatchRunConfig) -> dict[str, Any]:
         total_runs=len(config.rows),
         concurrency=config.concurrency,
         model_id=_summary_value({row.model_id for row in config.rows}) or "mixed",
-        enabled=os.environ.get("URDF_TUI_ENABLED", "1") != "0",
+        enabled=tui_enabled_from_env(),
     )
     for row in config.rows:
         display.add_run(

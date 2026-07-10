@@ -1,0 +1,176 @@
+{
+  "batch_id": "BATCH_GPT54_20260709",
+  "created_at": "2026-07-09T11:46:37.596466+00:00",
+  "repo_root": "D:\\code\\articraft-main",
+  "cases": [
+    {
+      "index": 5,
+      "case_id": "S05",
+      "suite": "01_Simple_Functional_10",
+      "case_ref": "01_Simple_Functional_10/cases/S05_draining_soap_dish"
+    },
+    {
+      "index": 6,
+      "case_id": "S06",
+      "suite": "01_Simple_Functional_10",
+      "case_ref": "01_Simple_Functional_10/cases/S06_inclined_phone_stand"
+    },
+    {
+      "index": 7,
+      "case_id": "S07",
+      "suite": "01_Simple_Functional_10",
+      "case_ref": "01_Simple_Functional_10/cases/S07_desk_clamp_headphone_hook"
+    },
+    {
+      "index": 8,
+      "case_id": "S08",
+      "suite": "01_Simple_Functional_10",
+      "case_ref": "01_Simple_Functional_10/cases/S08_stackable_parts_bin"
+    },
+    {
+      "index": 9,
+      "case_id": "S09",
+      "suite": "01_Simple_Functional_10",
+      "case_ref": "01_Simple_Functional_10/cases/S09_usb_sd_card_organizer"
+    },
+    {
+      "index": 10,
+      "case_id": "S10",
+      "suite": "01_Simple_Functional_10",
+      "case_ref": "01_Simple_Functional_10/cases/S10_modular_drawer_divider"
+    },
+    {
+      "index": 11,
+      "case_id": "F01",
+      "suite": "02_Furniture_10",
+      "case_ref": "02_Furniture_10/cases/F01_rounded_four_leg_stool"
+    },
+    {
+      "index": 12,
+      "case_id": "F02",
+      "suite": "02_Furniture_10",
+      "case_ref": "02_Furniture_10/cases/F02_simple_dining_chair"
+    },
+    {
+      "index": 13,
+      "case_id": "F03",
+      "suite": "02_Furniture_10",
+      "case_ref": "02_Furniture_10/cases/F03_slat_back_chair"
+    },
+    {
+      "index": 14,
+      "case_id": "F04",
+      "suite": "02_Furniture_10",
+      "case_ref": "02_Furniture_10/cases/F04_wooden_bench"
+    },
+    {
+      "index": 15,
+      "case_id": "F05",
+      "suite": "02_Furniture_10",
+      "case_ref": "02_Furniture_10/cases/F05_rounded_rectangular_coffee_table"
+    },
+    {
+      "index": 16,
+      "case_id": "F06",
+      "suite": "02_Furniture_10",
+      "case_ref": "02_Furniture_10/cases/F06_two_tier_side_table"
+    },
+    {
+      "index": 17,
+      "case_id": "F07",
+      "suite": "02_Furniture_10",
+      "case_ref": "02_Furniture_10/cases/F07_single_drawer_nightstand"
+    },
+    {
+      "index": 18,
+      "case_id": "F08",
+      "suite": "02_Furniture_10",
+      "case_ref": "02_Furniture_10/cases/F08_double_door_low_cabinet"
+    },
+    {
+      "index": 19,
+      "case_id": "F09",
+      "suite": "02_Furniture_10",
+      "case_ref": "02_Furniture_10/cases/F09_desk_with_cable_grommet"
+    },
+    {
+      "index": 20,
+      "case_id": "F10",
+      "suite": "02_Furniture_10",
+      "case_ref": "02_Furniture_10/cases/F10_open_cube_bookshelf"
+    },
+    {
+      "index": 21,
+      "case_id": "01_articulated_desk_lamp",
+      "suite": "cases",
+      "case_ref": "cases/01_articulated_desk_lamp"
+    },
+    {
+      "index": 22,
+      "case_id": "02_tilting_desk_fan",
+      "suite": "cases",
+      "case_ref": "cases/02_tilting_desk_fan"
+    },
+    {
+      "index": 23,
+      "case_id": "03_folding_quadcopter_frame",
+      "suite": "cases",
+      "case_ref": "cases/03_folding_quadcopter_frame"
+    },
+    {
+      "index": 24,
+      "case_id": "04_tiered_sewing_box",
+      "suite": "cases",
+      "case_ref": "cases/04_tiered_sewing_box"
+    },
+    {
+      "index": 25,
+      "case_id": "05_foldable_tripod_mount",
+      "suite": "cases",
+      "case_ref": "cases/05_foldable_tripod_mount"
+    },
+    {
+      "index": 26,
+      "case_id": "06_foldable_chair_model",
+      "suite": "cases",
+      "case_ref": "cases/06_foldable_chair_model"
+    },
+    {
+      "index": 27,
+      "case_id": "07_compound_pliers",
+      "suite": "cases",
+      "case_ref": "cases/07_compound_pliers"
+    },
+    {
+      "index": 28,
+      "case_id": "08_foldable_utility_cart",
+      "suite": "cases",
+      "case_ref": "cases/08_foldable_utility_cart"
+    },
+    {
+      "index": 29,
+      "case_id": "09_mini_stationary_bike",
+      "suite": "cases",
+      "case_ref": "cases/09_mini_stationary_bike"
+    },
+    {
+      "index": 30,
+      "case_id": "10_hinged_waffle_press",
+      "suite": "cases",
+      "case_ref": "cases/10_hinged_waffle_press"
+    }
+  ],
+  "run_options": {
+    "provider": "openai",
+    "model": "gpt-5.4",
+    "thinking": "med",
+    "openai_transport": "http",
+    "system_prompt": "designer_system_prompt.txt",
+    "compile_target": "visual",
+    "repo_root": "D:\\code\\articraft-main",
+    "openai_api": "chat_completions",
+    "delay_seconds": 20.0,
+    "delay_on_failure": 120.0,
+    "stop_on_error": false
+  }
+}
